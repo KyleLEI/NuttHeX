@@ -14,5 +14,5 @@ make
 Continue by uploading the built nuttx to the MCU
 
 ### Configuration
-Pin config: <board>/src/<board>.h
-Features config: <board>/<config>/defconfig
+Pin config: \<board\>/src/\<board\>.h
+Features config: \<board\>/\<config\>/defconfig
