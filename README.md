@@ -3,7 +3,7 @@ Core NuttX 7.23, with some adjustments
 
 ## Software Requirements
 
- - gcc-arm-none-eabi
+ - [gcc-arm-none-eabi](https://launchpad.net/gcc-arm-embedded/+download)
 
 ## Build
 

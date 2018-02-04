@@ -27,3 +27,4 @@ core
 /*.hex
 /pcode
 /tags
+.DS_Store
