@@ -25,7 +25,5 @@ core
 /*.bin
 /*.ihx
 /*.hex
-/.cproject
-/.project
 /pcode
 /tags
