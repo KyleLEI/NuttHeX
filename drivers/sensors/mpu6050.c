@@ -99,7 +99,7 @@ static const struct file_operations g_mpu6050_fops =
  *
  ****************************************************************************/
 
-static int veml6070_read8(FAR struct mpu6050_dev_s *priv, int offset,
+static int mpu6050_read8(FAR struct mpu6050_dev_s *priv, int offset,
                             FAR uint8_t *regval)
 {
   struct i2c_config_s config;
@@ -128,4 +128,143 @@ static int veml6070_read8(FAR struct mpu6050_dev_s *priv, int offset,
   sninfo("value: %08x ret: %d\n", *regval, ret);
   return OK;
 }
-#endif /* CONFIG_I2C && CONFIG_LM75_I2C */
+
+/****************************************************************************
+ * Name: veml6070_write8
+ *
+ * Description:
+ *   Write from an 8-bit register
+ *
+ ****************************************************************************/
+
+static int mpu6050_write8(FAR struct mpu6050_dev_s *priv, uint8_t regval)
+{
+  struct i2c_config_s config;
+  int ret;
+
+  sninfo("value: %02x\n", regval);
+
+  /* Set up the I2C configuration */
+
+  config.frequency = CONFIG_MPU6050_I2C_FREQUENCY;
+  config.address   = priv->addr;
+  config.addrlen   = 7;
+
+  /* Write 8 bits to device */
+
+  ret = i2c_write(priv->i2c, &config, &regval, 1);
+  if (ret < 0)
+    {
+      snerr("ERROR: i2c_write failed: %d\n", ret);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: mpu6050_open
+ *
+ * Description:
+ *   This function is called whenever the MPU6050 device is opened.
+ *
+ ****************************************************************************/
+
+static int mpu6050_open(FAR struct file *filep)
+{
+  return OK;
+}
+
+/****************************************************************************
+ * Name: mpu6050_close
+ *
+ * Description:
+ *   This routine is called when the MPU6050 device is closed.
+ *
+ ****************************************************************************/
+
+static int mpu6050_close(FAR struct file *filep)
+{
+  return OK;
+}
+
+/****************************************************************************
+ * Name: mpu6050_read
+ ****************************************************************************/
+//TODO: continue reading the right size and write to buffer
+static ssize_t mpu6050_read(FAR struct file *filep, FAR char *buffer,
+                              size_t buflen)
+{
+  int ret;
+  FAR struct inode         *inode;
+  FAR struct mpu6050_dev_s *priv;
+  int msb = 1;
+  uint16_t regdata;
+
+  DEBUGASSERT(filep);
+  inode = filep->f_inode;
+
+  DEBUGASSERT(inode && inode->i_private);
+  priv  = (FAR struct mpu6050_dev_s *)inode->i_private;
+
+  /* Check if the user is reading the right size */
+
+  if (buflen != 2)
+    {
+      snerr("ERROR: You need to read 2 bytes from this sensor!\n");
+      return -EINVAL;
+    }
+
+  /* Enable the sensor */
+
+  ret = veml6070_write8(priv, VEML6070_CMD_RSV & ~VEML6070_CMD_SD);
+  if (ret < 0)
+    {
+      snerr("ERROR: Failed to enable the VEML6070!\n");
+      return -EINVAL;
+    }
+
+  /* 1T for Rset 270Kohms is 125ms */
+
+  nxsig_usleep(125000);
+
+  /* Read the MSB first */
+
+  ret = veml6070_read8(priv, msb, (FAR uint8_t *) &regdata);
+  if (ret < 0)
+    {
+      snerr("ERROR: Error reading light sensor!\n");
+      return ret;
+    }
+
+  buffer[1] = regdata;
+
+  /* Read the LSB */
+
+  msb = 0;
+  ret = veml6070_read8(priv, msb, (FAR uint8_t *) &regdata);
+  if (ret < 0)
+    {
+      snerr("ERROR: Error reading light sensor!\n");
+      return ret;
+    }
+
+  buffer[0] = regdata;
+
+  /* Feed sensor data to entropy pool */
+
+  add_sensor_randomness((buffer[1] << 16) ^ buffer[0]);
+
+  return buflen;
+}
+
+/****************************************************************************
+ * Name: mpu6050_write
+ ****************************************************************************/
+
+static ssize_t mpu6050_write(FAR struct file *filep,
+                               FAR const char *buffer, size_t buflen)
+{
+  return -ENOSYS;
+}
+
+#endif /* CONFIG_I2C && CONFIG_SENSOR_MPU6050 */
