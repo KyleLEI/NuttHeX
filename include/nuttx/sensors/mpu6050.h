@@ -7,8 +7,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_SENSORS_MPU6050_H_
-#define __INCLUDE_NUTTX_SENSORS_MPU6050_H_
+#ifndef __INCLUDE_NUTTX_SENSORS_MPU6050_H
+#define __INCLUDE_NUTTX_SENSORS_MPU6050_H
 
 /****************************************************************************
  * Included Files
@@ -124,7 +124,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: veml6070_register
+ * Name: mpu6050_register
  *
  * Description:
  *   Register the MPU6050 character device as 'devpath'
@@ -150,4 +150,4 @@ int mpu6050_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 #endif
 
 #endif /* CONFIG_I2C && CONFIG_MPU6050_I2C */
-#endif /* __INCLUDE_NUTTX_SENSORS_MPU6050_H_ */
+#endif /* __INCLUDE_NUTTX_SENSORS_MPU6050_H */
