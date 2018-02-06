@@ -17,7 +17,8 @@
 #include <nuttx/config.h>
 #include <nuttx/sensors/ioctl.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_MPU6050)
+//TODO: add the macro guard back when finished
+//#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_MPU6050)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -149,5 +150,5 @@ int mpu6050_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 }
 #endif
 
-#endif /* CONFIG_I2C && CONFIG_MPU6050_I2C */
+//#endif /* CONFIG_I2C && CONFIG_MPU6050_I2C */
 #endif /* __INCLUDE_NUTTX_SENSORS_MPU6050_H */

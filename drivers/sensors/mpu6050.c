@@ -53,8 +53,8 @@ struct mpu6050_dev_s
 
 /* I2C Helpers */
 
-static int     mpu6050_read8(FAR struct mpu6050_dev_s *priv, int offset,
-                 FAR uint8_t *regval);
+static int     mpu6050_read8(FAR struct mpu6050_dev_s *priv,
+        uint8_t const regaddr, FAR uint8_t *regval);
 static int     mpu6050_write8(FAR struct mpu6050_dev_s *priv,
                  uint8_t regval);
 
@@ -95,37 +95,40 @@ static const struct file_operations g_mpu6050_fops =
  * Name: mpu6050_read8
  *
  * Description:
- *   Read 8-bit register
+ *   Read an arbitrary number of bytes starting at regaddr
  *
  ****************************************************************************/
 
-static int mpu6050_read8(FAR struct mpu6050_dev_s *priv, int offset,
-                            FAR uint8_t *regval)
+static int mpu6050_read8(FAR struct mpu6050_dev_s *priv,
+                           uint8_t const regaddr, FAR uint8_t *regval)
 {
   struct i2c_config_s config;
-  uint8_t data[1];
   int ret = -1;
 
   /* Set up the I2C configuration */
 
   config.frequency = CONFIG_MPU6050_I2C_FREQUENCY;
-  config.address   = priv->addr + offset;
+  config.address   = priv->addr;
   config.addrlen   = 7;
 
-  /* Read 8-bits from the device */
+  /* Write the register address to read from */
 
-  ret = i2c_read(priv->i2c, &config, data, 1);
+  ret = i2c_write(priv->addr, &config, &regaddr, 1);
+  if (ret < 0)
+    {
+      snerr ("i2c_write failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Read "len" bytes from regaddr */
+
+  ret = i2c_read(priv->addr, &config, regval,1);
   if (ret < 0)
     {
       snerr ("i2c_read failed: %d\n", ret);
       return ret;
     }
 
-  /* Copy the content of the buffer to the location of the uint8_t pointer */
-
-  *regval = data[0];
-
-  sninfo("value: %08x ret: %d\n", *regval, ret);
   return OK;
 }
 
@@ -189,16 +192,22 @@ static int mpu6050_close(FAR struct file *filep)
 
 /****************************************************************************
  * Name: mpu6050_read
+ *
+ * Description:
+ * 	This routine reads the contents of registers indicated in regs[12]
+ * 	to the provided buffer.
+ *
+ * 	Further processing is required to combine H & L and converting according to
+ * 	range settings to practical data in m/(s*s)
+ *
  ****************************************************************************/
-//TODO: continue reading the right size and write to buffer
+
 static ssize_t mpu6050_read(FAR struct file *filep, FAR char *buffer,
                               size_t buflen)
 {
   int ret;
   FAR struct inode         *inode;
   FAR struct mpu6050_dev_s *priv;
-  int msb = 1;
-  uint16_t regdata;
 
   DEBUGASSERT(filep);
   inode = filep->f_inode;
@@ -208,51 +217,37 @@ static ssize_t mpu6050_read(FAR struct file *filep, FAR char *buffer,
 
   /* Check if the user is reading the right size */
 
-  if (buflen != 2)
+  if (buflen != 12)
     {
-      snerr("ERROR: You need to read 2 bytes from this sensor!\n");
+      snerr("ERROR: You need to read 6 signed 16-bit integer from this sensor!\n");
       return -EINVAL;
     }
 
-  /* Enable the sensor */
+  static const uint8_t regaddrs[12]={
+		  MPUREG_ACCEL_XOUT_H,
+		  MPUREG_ACCEL_XOUT_L,
+		  MPUREG_ACCEL_YOUT_H,
+		  MPUREG_ACCEL_YOUT_L,
+		  MPUREG_ACCEL_ZOUT_H,
+		  MPUREG_ACCEL_ZOUT_L,
 
-  ret = veml6070_write8(priv, VEML6070_CMD_RSV & ~VEML6070_CMD_SD);
-  if (ret < 0)
-    {
-      snerr("ERROR: Failed to enable the VEML6070!\n");
-      return -EINVAL;
-    }
+		  MPUREG_GYRO_XOUT_H,
+		  MPUREG_GYRO_XOUT_L,
+		  MPUREG_GYRO_YOUT_H,
+		  MPUREG_GYRO_YOUT_L,
+		  MPUREG_GYRO_ZOUT_H,
+		  MPUREG_GYRO_ZOUT_L
+  };
 
-  /* 1T for Rset 270Kohms is 125ms */
-
-  nxsig_usleep(125000);
-
-  /* Read the MSB first */
-
-  ret = veml6070_read8(priv, msb, (FAR uint8_t *) &regdata);
-  if (ret < 0)
-    {
-      snerr("ERROR: Error reading light sensor!\n");
-      return ret;
-    }
-
-  buffer[1] = regdata;
-
-  /* Read the LSB */
-
-  msb = 0;
-  ret = veml6070_read8(priv, msb, (FAR uint8_t *) &regdata);
-  if (ret < 0)
-    {
-      snerr("ERROR: Error reading light sensor!\n");
-      return ret;
-    }
-
-  buffer[0] = regdata;
-
-  /* Feed sensor data to entropy pool */
-
-  add_sensor_randomness((buffer[1] << 16) ^ buffer[0]);
+  int regnum;
+  for (regnum = 0;regnum < 12;regnum++){
+	  ret = mpu6050_read8(priv, regaddrs[regnum],&buffer[regnum]);
+	    if (ret < 0)
+	      {
+	        snerr("ERROR: Error reading MPU6050!\n");
+	        return ret;
+	      }
+  }
 
   return buflen;
 }
