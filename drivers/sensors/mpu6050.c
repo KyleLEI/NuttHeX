@@ -262,4 +262,65 @@ static ssize_t mpu6050_write(FAR struct file *filep,
   return -ENOSYS;
 }
 
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: mpu6050_register
+ *
+ * Description:
+ *   Register the MPU6050 character device as 'devpath'
+ *
+ * Input Parameters:
+ *   devpath - The full path to the driver to register. E.g., "/dev/mpu6050"
+ *   i2c - An instance of the I2C interface to use to communicate with MPU6050
+ *   addr - The I2C address of the MPU6050.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int mpu6050_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
+                       uint8_t addr)
+{
+  int ret;
+
+  /* Sanity check */
+
+  DEBUGASSERT(i2c != NULL);
+
+  /* Initialize the MPU6050 device structure */
+
+  FAR struct mpu6050_dev_s *priv =
+    (FAR struct mpu6050_dev_s *)kmm_malloc(sizeof(struct mpu6050_dev_s));
+
+  if (priv == NULL)
+    {
+      snerr("ERROR: Failed to allocate instance\n");
+      return -ENOMEM;
+    }
+
+  priv->i2c  = i2c;
+  priv->addr = addr;
+
+  if (ret < 0)
+    {
+      snerr("ERROR: Failed to initialize the VEML6070!\n");
+      return ret;
+    }
+
+  /* Register the character driver */
+
+  ret = register_driver(devpath, &g_mpu6050_fops, 0666, priv);
+  if (ret < 0)
+    {
+      snerr("ERROR: Failed to register driver: %d\n", ret);
+      kmm_free(priv);
+    }
+
+  return ret;
+}
+
 #endif /* CONFIG_I2C && CONFIG_SENSOR_MPU6050 */
