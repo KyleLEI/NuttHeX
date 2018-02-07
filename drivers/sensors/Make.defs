@@ -134,7 +134,7 @@ ifeq ($(CONFIG_SENSORS_INA219),y)
 endif
 
 ifeq ($(CONFIG_SENSORS_MPU6050),y)
-CSRCS += mpu6050.c
+  CSRCS += mpu6050.c
 endif
 
 endif # CONFIG_I2C

@@ -49,8 +49,8 @@ struct mpu6050_dev_s
 
 /* I2C Helpers */
 
-static int     mpu6050_read8(FAR struct mpu6050_dev_s *priv,
-        uint8_t const regaddr, FAR uint8_t *regval);
+static int     mpu6050_i2c_read(FAR struct mpu6050_dev_s *priv,
+        uint8_t const regaddr, FAR uint8_t *regval, int len);
 static int     mpu6050_write8(FAR struct mpu6050_dev_s *priv,
                  uint8_t regval);
 
@@ -88,15 +88,15 @@ static const struct file_operations g_mpu6050_fops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mpu6050_read8
+ * Name: mpu6050_i2c_read
  *
  * Description:
  *   Read an arbitrary number of bytes starting at regaddr
  *
  ****************************************************************************/
 
-static int mpu6050_read8(FAR struct mpu6050_dev_s *priv,
-                           uint8_t const regaddr, FAR uint8_t *regval)
+static int mpu6050_i2c_read(FAR struct mpu6050_dev_s *priv,
+                           uint8_t const regaddr, FAR uint8_t *regval, int len)
 {
   struct i2c_config_s config;
   int ret = -1;
@@ -118,7 +118,7 @@ static int mpu6050_read8(FAR struct mpu6050_dev_s *priv,
 
   /* Read "len" bytes from regaddr */
 
-  ret = i2c_read(priv->addr, &config, regval,1);
+  ret = i2c_read(priv->addr, &config, regval,len);
   if (ret < 0)
     {
       snerr ("i2c_read failed: %d\n", ret);
@@ -190,11 +190,17 @@ static int mpu6050_close(FAR struct file *filep)
  * Name: mpu6050_read
  *
  * Description:
- * 	This routine reads the contents of registers indicated in regs[12]
- * 	to the provided buffer.
+ * 	This routine reads the contents of ACCEL & GYRO output registers, in the
+ * 	order of MPUREG_ACCEL_XOUT_H	and the following 5 regs, and MPUREG_GYRO_XOUT_H
+ * 	and the following 5 regs
  *
  * 	Further processing is required to combine H & L and converting according to
  * 	range settings to practical data in m/(s*s)
+ *
+ * 	One way of combining H & L is
+ *
+ * 	buffer[2 * i] << 8 + buffer[2 * i + 1]
+ *
  *
  ****************************************************************************/
 
@@ -213,36 +219,29 @@ static ssize_t mpu6050_read(FAR struct file *filep, FAR char *buffer,
 
   /* Check if the user is reading the right size */
 
-  if (buflen != 12)
+  if (buflen < 12)
     {
       snerr("ERROR: You need to read 6 signed 16-bit integer from this sensor!\n");
       return -EINVAL;
     }
 
-  static const uint8_t regaddrs[12]={
-		  MPUREG_ACCEL_XOUT_H,
-		  MPUREG_ACCEL_XOUT_L,
-		  MPUREG_ACCEL_YOUT_H,
-		  MPUREG_ACCEL_YOUT_L,
-		  MPUREG_ACCEL_ZOUT_H,
-		  MPUREG_ACCEL_ZOUT_L,
+  /* Read ACCEL registers consecutively*/
 
-		  MPUREG_GYRO_XOUT_H,
-		  MPUREG_GYRO_XOUT_L,
-		  MPUREG_GYRO_YOUT_H,
-		  MPUREG_GYRO_YOUT_L,
-		  MPUREG_GYRO_ZOUT_H,
-		  MPUREG_GYRO_ZOUT_L
-  };
+  ret = mpu6050_i2c_read(priv, MPUREG_ACCEL_XOUT_H, &buffer[0], 6);
+  if (ret < 0)
+  {
+	  snerr("ERROR: Error reading MPU6050!\n");
+	  return ret;
 
-  int regnum;
-  for (regnum = 0;regnum < 12;regnum++){
-	  ret = mpu6050_read8(priv, regaddrs[regnum],&buffer[regnum]);
-	    if (ret < 0)
-	      {
-	        snerr("ERROR: Error reading MPU6050!\n");
-	        return ret;
-	      }
+  }
+
+  /* Read ACCEL registers consecutively*/
+
+  ret = mpu6050_i2c_read(priv, MPUREG_GYRO_XOUT_H, &buffer[6], 6);
+  if (ret < 0)
+  {
+	  snerr("ERROR: Error reading MPU6050!\n");
+ 	  return ret;
   }
 
   return buflen;
@@ -303,7 +302,7 @@ int mpu6050_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   if (ret < 0)
     {
-      snerr("ERROR: Failed to initialize the VEML6070!\n");
+      snerr("ERROR: Failed to initialize the MPU6050!\n");
       return ret;
     }
 

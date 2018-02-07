@@ -425,3 +425,15 @@ config XEN1210_REGDEBUG
 config SENSORS_ZEROCROSS
 	bool "Zero Cross Sensor"
 	default n
+
+config SENSORS_MPU6050
+	bool "InvenSense MPU-6050 6-axis accelerometer/gyroscope support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the InvenSense MPU-6050 6-axis accelerometer/gyroscope.
+
+config MPU6050_I2C_FREQUENCY
+	int "MPU-6050 I2C frequency"
+	default 100000
+	depends on SENSORS_MPU6050
