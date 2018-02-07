@@ -248,6 +248,16 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_SENSORS_MPU6050
+  /* Configure and initialize the InvenSense MPU-6050 6-axis accelerometer/gyroscope */
+
+  ret = stm32_mpu6050initialize("/dev/mpu6050");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_mpu6050_initialize() failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_CAN_MCP2515
   /* Configure and initialize the MCP2515 CAN device */
 

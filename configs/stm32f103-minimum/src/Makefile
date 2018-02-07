@@ -121,6 +121,10 @@ ifeq ($(CONFIG_SENSORS_APDS9960),y)
   CSRCS += stm32_apds9960.c
 endif
 
+ifeq ($(CONFIG_SENSORS_MPU6050),y)
+  CSRCS += stm32_mpu6050.c
+endif
+
 ifeq ($(CONFIG_SENSORS_QENCODER),y)
   CSRCS += stm32_qencoder.c
 endif

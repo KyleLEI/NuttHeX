@@ -230,6 +230,18 @@ int stm32_apds9960initialize(FAR const char *devpath);
 void stm32_spidev_initialize(void);
 
 /************************************************************************************
+ * Name: stm32_mpu6050initialize
+ *
+ * Description:
+ *   Initializes the InvenSense MPU-6050 6-axis accelerometer/gyroscope.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_SENSORS_MPU6050
+int stm32_mpu6050initialize(FAR const char *devpath);
+#endif
+
+/************************************************************************************
  * Name: stm32_mmcsd_initialize
  *
  * Description:
