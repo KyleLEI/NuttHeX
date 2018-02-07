@@ -52,6 +52,7 @@ int stm32_mpu6050initialize(FAR const char *devpath)
 
   if (!i2c)
     {
+	  syslog(LOG_ERR, "ERROR: Error initializing I2C bus: %d\n", ret);
       return -ENODEV;
     }
 
@@ -60,7 +61,7 @@ int stm32_mpu6050initialize(FAR const char *devpath)
   ret = mpu6050_register(devpath, i2c, 0xD0);
   if (ret < 0)
     {
-      snerr("ERROR: Error registering BM180\n");
+      syslog(LOG_ERR, "ERROR: Error registering MPU6050: %d\n", ret);
     }
 
   return ret;

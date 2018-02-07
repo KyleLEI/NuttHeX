@@ -28,3 +28,6 @@ Continue by uploading the built nuttx to the MCU
 \<board\>/src/\<board\>.h
 ### Features config: 
 \<board\>/\<config\>/defconfig
+
+## New Device Driver
+ - MPU6050

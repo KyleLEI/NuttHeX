@@ -191,7 +191,7 @@ static int mpu6050_i2c_write(FAR struct mpu6050_dev_s *priv, uint8_t* regval,int
   ret = i2c_write(priv->i2c, &config, regval, len);
   if (ret < 0)
     {
-      snerr("ERROR: i2c_write failed: %d\n", ret);
+      syslog(LOG_ERR,"ERROR: i2c_write failed: %d\n", ret);
     }
 
   return ret;
@@ -218,6 +218,10 @@ static int mpu6050_write8(FAR struct mpu6050_dev_s *priv,
 
   ret = mpu6050_i2c_write(priv, data, 2);
 
+  if (ret < 0)
+      {
+        syslog(LOG_ERR,"ERROR: i2c_write8 failed: %d\n", ret);
+      }
   return ret;
 }
 
@@ -340,7 +344,7 @@ static ssize_t mpu6050_write(FAR struct file *filep,
 
 int mpu6050_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                        uint8_t addr)
-{
+{//FIXME: failed write
   int ret;
 
   /* Sanity check */
@@ -354,19 +358,28 @@ int mpu6050_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   if (priv == NULL)
     {
-      snerr("ERROR: Failed to allocate instance\n");
+      syslog(LOG_ERR, "ERROR: Failed to allocate instance\n");
       return -ENOMEM;
     }
 
   priv->i2c  = i2c;
   priv->addr = addr;
 
+  /* Register the character driver */
+
+    ret = register_driver(devpath, &g_mpu6050_fops, 0666, priv);
+    if (ret < 0)
+      {
+        syslog(LOG_ERR,"ERROR: Failed to register driver: %d\n", ret);
+        kmm_free(priv);
+      }
+
   /* Activate the device and take it out of sleep mode */
 
   ret = mpu6050_write8(priv, MPUREG_PWR_MGMT_1, 0x00);
   if (ret < 0)
   {
-	  snerr("ERROR: Failed to write MPUREG_PWR_MGMT_1!\n");
+	  syslog(LOG_ERR, "ERROR: Failed to write MPUREG_PWR_MGMT_1: %d\n",ret);
 	  return ret;
   }
 
@@ -375,7 +388,7 @@ int mpu6050_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   ret = mpu6050_write8(priv, MPUREG_SMPLRT_DIV, CONFIG_MPU6050_SMPLRT);
   if (ret < 0)
   {
-	snerr("ERROR: Failed to write MPUREG_SMPLRT_DIV!\n");
+	syslog(LOG_ERR, "ERROR: Failed to write MPUREG_SMPLRT_DIV!\n");
 	return ret;
   }
 
@@ -396,15 +409,6 @@ int mpu6050_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 	snerr("ERROR: Failed to write MPUREG_SMPLRT_DIV!\n");
     	return ret;
   }
-
-  /* Register the character driver */
-
-  ret = register_driver(devpath, &g_mpu6050_fops, 0666, priv);
-  if (ret < 0)
-    {
-      snerr("ERROR: Failed to register driver: %d\n", ret);
-      kmm_free(priv);
-    }
 
   return ret;
 }
