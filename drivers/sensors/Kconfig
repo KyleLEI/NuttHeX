@@ -433,7 +433,26 @@ config SENSORS_MPU6050
 	---help---
 		Enable driver support for the InvenSense MPU-6050 6-axis accelerometer/gyroscope.
 
+if SENSORS_MPU6050
+
 config MPU6050_I2C_FREQUENCY
 	int "MPU-6050 I2C frequency"
-	default 100000
-	depends on SENSORS_MPU6050
+	default 400000
+	range 1 400000
+
+config MPU6050_SMPLRT
+	int "MPU-6050 sampling rate divider"
+	default 7
+	range 0 100
+	
+config CONFIG_MPU6050_ACCEL_RANGE
+	int "MPU-6050 accelerometer range index"
+	default 0
+	range 0 3
+	
+config CONFIG_MPU6050_GYRO_RANGE
+	int "MPU-6050 gyroscope range index"
+	default 0
+	range 0 3
+
+endif #SENSORS_MPU6050

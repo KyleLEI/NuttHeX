@@ -33,6 +33,43 @@
 #  define CONFIG_MPU6050_I2C_FREQUENCY 100000
 #endif
 
+/**Sample Rate = Gyroscope Output Rate / (1 + SMPLRT_DIV)
+ *
+ * where Gyroscope Output Rate = 8kHz when the DLPF is disabled (DLPF_CFG = 0 or
+ * 7), and 1kHz when the DLPF is enabled (see Register 26).
+ */
+
+#ifndef CONFIG_MPU6050_SMPLRT
+#  define CONFIG_MPU6050_SMPLRT 0x07
+#endif
+
+/** MPUREG_ACCEL_CONFIG [4:3]
+ * <pre>
+ * 0 = +/- 2g
+ * 1 = +/- 4g
+ * 2 = +/- 8g
+ * 3 = +/- 16g
+ * </pre>
+ */
+
+#ifndef CONFIG_MPU6050_ACCEL_RANGE
+#  define CONFIG_MPU6050_ACCEL_RANGE 0
+#endif
+
+/**
+ * MPUREG_GYRO_CONFIG [4:3]
+ * <pre>
+ * 0 = +/- 250 degrees/sec
+ * 1 = +/- 500 degrees/sec
+ * 2 = +/- 1000 degrees/sec
+ * 3 = +/- 2000 degrees/sec
+ * </pre>
+ */
+
+#ifndef CONFIG_MPU6050_GYRO_RANGE
+#  define CONFIG_MPU6050_GYRO_RANGE 0
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -51,8 +88,10 @@ struct mpu6050_dev_s
 
 static int     mpu6050_i2c_read(FAR struct mpu6050_dev_s *priv,
         uint8_t const regaddr, FAR uint8_t *regval, int len);
+static int 	   mpu6050_i2c_write(FAR struct mpu6050_dev_s *priv,
+		uint8_t* regval,int len);
 static int     mpu6050_write8(FAR struct mpu6050_dev_s *priv,
-                 uint8_t regval);
+		uint8_t const regaddr, uint8_t regval);
 
 /* Character driver methods */
 
@@ -109,7 +148,7 @@ static int mpu6050_i2c_read(FAR struct mpu6050_dev_s *priv,
 
   /* Write the register address to read from */
 
-  ret = i2c_write(priv->addr, &config, &regaddr, 1);
+  ret = i2c_write(priv->i2c, &config, &regaddr, 1);
   if (ret < 0)
     {
       snerr ("i2c_write failed: %d\n", ret);
@@ -118,7 +157,7 @@ static int mpu6050_i2c_read(FAR struct mpu6050_dev_s *priv,
 
   /* Read "len" bytes from regaddr */
 
-  ret = i2c_read(priv->addr, &config, regval,len);
+  ret = i2c_read(priv->i2c, &config, regval,len);
   if (ret < 0)
     {
       snerr ("i2c_read failed: %d\n", ret);
@@ -129,19 +168,17 @@ static int mpu6050_i2c_read(FAR struct mpu6050_dev_s *priv,
 }
 
 /****************************************************************************
- * Name: veml6070_write8
+ * Name: mpu6050_i2c_write
  *
  * Description:
- *   Write from an 8-bit register
+ *   Write address/data to mpu6050
  *
  ****************************************************************************/
 
-static int mpu6050_write8(FAR struct mpu6050_dev_s *priv, uint8_t regval)
+static int mpu6050_i2c_write(FAR struct mpu6050_dev_s *priv, uint8_t* regval,int len)
 {
   struct i2c_config_s config;
   int ret;
-
-  sninfo("value: %02x\n", regval);
 
   /* Set up the I2C configuration */
 
@@ -151,11 +188,35 @@ static int mpu6050_write8(FAR struct mpu6050_dev_s *priv, uint8_t regval)
 
   /* Write 8 bits to device */
 
-  ret = i2c_write(priv->i2c, &config, &regval, 1);
+  ret = i2c_write(priv->i2c, &config, regval, len);
   if (ret < 0)
     {
       snerr("ERROR: i2c_write failed: %d\n", ret);
     }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: mpu6050_write8
+ *
+ * Description:
+ *   Write an arbitrary number of bytes starting at regaddr.
+ *
+ ****************************************************************************/
+
+static int mpu6050_write8(FAR struct mpu6050_dev_s *priv,
+                             uint8_t const regaddr, uint8_t regval)
+{
+  int ret;
+  uint8_t data[2];
+
+  /* Create the addr:val data */
+
+  data[0] = regaddr;
+  data[1] = regval;
+
+  ret = mpu6050_i2c_write(priv, data, 2);
 
   return ret;
 }
@@ -227,7 +288,7 @@ static ssize_t mpu6050_read(FAR struct file *filep, FAR char *buffer,
 
   /* Read ACCEL registers consecutively*/
 
-  ret = mpu6050_i2c_read(priv, MPUREG_ACCEL_XOUT_H, &buffer[0], 6);
+  ret = mpu6050_i2c_read(priv, MPUREG_ACCEL_XOUT_H, (FAR uint8_t *)&buffer[0], 6);
   if (ret < 0)
   {
 	  snerr("ERROR: Error reading MPU6050!\n");
@@ -237,7 +298,7 @@ static ssize_t mpu6050_read(FAR struct file *filep, FAR char *buffer,
 
   /* Read ACCEL registers consecutively*/
 
-  ret = mpu6050_i2c_read(priv, MPUREG_GYRO_XOUT_H, &buffer[6], 6);
+  ret = mpu6050_i2c_read(priv, MPUREG_GYRO_XOUT_H, (FAR uint8_t *)&buffer[6], 6);
   if (ret < 0)
   {
 	  snerr("ERROR: Error reading MPU6050!\n");
@@ -300,11 +361,41 @@ int mpu6050_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   priv->i2c  = i2c;
   priv->addr = addr;
 
+  /* Activate the device and take it out of sleep mode */
+
+  ret = mpu6050_write8(priv, MPUREG_PWR_MGMT_1, 0x00);
   if (ret < 0)
-    {
-      snerr("ERROR: Failed to initialize the MPU6050!\n");
-      return ret;
-    }
+  {
+	  snerr("ERROR: Failed to write MPUREG_PWR_MGMT_1!\n");
+	  return ret;
+  }
+
+  /* Set sampling rate of the device */
+
+  ret = mpu6050_write8(priv, MPUREG_SMPLRT_DIV, CONFIG_MPU6050_SMPLRT);
+  if (ret < 0)
+  {
+	snerr("ERROR: Failed to write MPUREG_SMPLRT_DIV!\n");
+	return ret;
+  }
+
+  /* Set accelerometer range */
+
+  ret = mpu6050_write8(priv, MPUREG_ACCEL_CONFIG, CONFIG_MPU6050_ACCEL_RANGE<<3);
+  if (ret < 0)
+  {
+	snerr("ERROR: Failed to write MPUREG_SMPLRT_DIV!\n");
+  	return ret;
+  }
+
+   /* Set gyroscope range */
+
+  ret = mpu6050_write8(priv, MPUREG_GYRO_CONFIG, CONFIG_MPU6050_ACCEL_RANGE<<3);
+  if (ret < 0)
+  {
+	snerr("ERROR: Failed to write MPUREG_SMPLRT_DIV!\n");
+    	return ret;
+  }
 
   /* Register the character driver */
 
