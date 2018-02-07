@@ -29,8 +29,6 @@
 
 /* Device I2C Address */
 
-#define APDS9960_I2C_ADDR 0x39
-
 /* MPU 6000 registers */
 
 #define MPUREG_WHOAMI			0x75

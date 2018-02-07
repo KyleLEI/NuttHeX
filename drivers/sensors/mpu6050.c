@@ -151,7 +151,7 @@ static int mpu6050_i2c_read(FAR struct mpu6050_dev_s *priv,
   ret = i2c_write(priv->i2c, &config, &regaddr, 1);
   if (ret < 0)
     {
-      snerr ("i2c_write failed: %d\n", ret);
+	  syslog(LOG_ERR,"i2c_write to 0x%02X -> 0x%02X failed: %d\n", priv->addr,regaddr,ret);
       return ret;
     }
 
@@ -160,7 +160,7 @@ static int mpu6050_i2c_read(FAR struct mpu6050_dev_s *priv,
   ret = i2c_read(priv->i2c, &config, regval,len);
   if (ret < 0)
     {
-      snerr ("i2c_read failed: %d\n", ret);
+	  syslog(LOG_ERR,"i2c_read failed: %d\n", ret);
       return ret;
     }
 
@@ -191,7 +191,7 @@ static int mpu6050_i2c_write(FAR struct mpu6050_dev_s *priv, uint8_t* regval,int
   ret = i2c_write(priv->i2c, &config, regval, len);
   if (ret < 0)
     {
-      syslog(LOG_ERR,"ERROR: i2c_write failed: %d\n", ret);
+      syslog(LOG_ERR,"ERROR: i2c_write to addr [0x%02X] failed: %d\n",config.address, ret);
     }
 
   return ret;
@@ -344,7 +344,7 @@ static ssize_t mpu6050_write(FAR struct file *filep,
 
 int mpu6050_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                        uint8_t addr)
-{//FIXME: failed write
+{
   int ret;
 
   /* Sanity check */
@@ -365,14 +365,16 @@ int mpu6050_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   priv->i2c  = i2c;
   priv->addr = addr;
 
-  /* Register the character driver */
-
-    ret = register_driver(devpath, &g_mpu6050_fops, 0666, priv);
-    if (ret < 0)
-      {
-        syslog(LOG_ERR,"ERROR: Failed to register driver: %d\n", ret);
-        kmm_free(priv);
-      }
+  //TODO: remove when done
+  uint8_t temp=0;
+  ret=mpu6050_i2c_read(priv,MPUREG_WHOAMI,&temp,1);
+  if (ret < 0)
+    {
+  	  syslog(LOG_ERR, "ERROR: Failed to read WHOAMI: %d\n",ret);
+  	  return ret;
+    }
+  	  syslog(LOG_ERR, "INFO: WHOAMI: [0x%02X]\n",temp);
+//  	  return ret;
 
   /* Activate the device and take it out of sleep mode */
 
@@ -397,7 +399,7 @@ int mpu6050_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   ret = mpu6050_write8(priv, MPUREG_ACCEL_CONFIG, CONFIG_MPU6050_ACCEL_RANGE<<3);
   if (ret < 0)
   {
-	snerr("ERROR: Failed to write MPUREG_SMPLRT_DIV!\n");
+	  syslog(LOG_ERR,"ERROR: Failed to write MPUREG_SMPLRT_DIV!\n");
   	return ret;
   }
 
@@ -406,9 +408,18 @@ int mpu6050_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   ret = mpu6050_write8(priv, MPUREG_GYRO_CONFIG, CONFIG_MPU6050_ACCEL_RANGE<<3);
   if (ret < 0)
   {
-	snerr("ERROR: Failed to write MPUREG_SMPLRT_DIV!\n");
+	  syslog(LOG_ERR,"ERROR: Failed to write MPUREG_SMPLRT_DIV!\n");
     	return ret;
   }
+
+  /* Register the character driver */
+
+  ret = register_driver(devpath, &g_mpu6050_fops, 0666, priv);
+  if (ret < 0)
+    {
+	  syslog(LOG_ERR,"ERROR: Failed to register driver: %d\n", ret);
+      kmm_free(priv);
+    }
 
   return ret;
 }

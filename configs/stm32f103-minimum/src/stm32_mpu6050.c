@@ -22,7 +22,7 @@
 #include "stm32_i2c.h"
 #include "stm32f103_minimum.h"
 
-#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_MPU6050) && defined(CONFIG_STM32_I2C1)
+#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_MPU6050)
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
@@ -48,17 +48,17 @@ int stm32_mpu6050initialize(FAR const char *devpath)
 
   /* Initialize I2C */
 
-  i2c = stm32_i2cbus_initialize(1);
+  i2c = stm32_i2cbus_initialize(2);
 
   if (!i2c)
     {
-	  syslog(LOG_ERR, "ERROR: Error initializing I2C bus: %d\n", ret);
+	  syslog(LOG_ERR, "ERROR: Error initializing I2C bus");
       return -ENODEV;
     }
 
-  /* Then register the light sensor */
+  /* Then register the device */
 
-  ret = mpu6050_register(devpath, i2c, 0xD0);
+  ret = mpu6050_register(devpath, i2c, 0xAA);//FIXME: wrong address
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Error registering MPU6050: %d\n", ret);
