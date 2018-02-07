@@ -28,3 +28,5 @@ core
 /pcode
 /tags
 .DS_Store
+.project
+.cproject

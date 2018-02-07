@@ -19,3 +19,10 @@
 #include "stm32.h"
 #include "stm32_i2c.h"
 #include "stm32f103_minimum.h"
+
+//TODO: remove comment
+#define CONFIG_SENSORS_MPU6050
+#define CONFIG_I2C
+#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_MPU6050)
+
+#endif

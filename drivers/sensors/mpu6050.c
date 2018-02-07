@@ -23,10 +23,6 @@
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/mpu6050.h>
 
-//TODO: remove these two lines to enable macro guard
-#define CONFIG_SENSORS_MPU6050
-#define CONFIG_I2C
-
 #if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_MPU6050)
 
 /****************************************************************************
