@@ -150,7 +150,7 @@ static int mpu6050_i2c_read(FAR struct mpu6050_dev_s *priv,
 
   /* Write the register address to read from */
 
-  for(mpu_addr=0x00;mpu_addr<127;mpu_addr+=2){
+  for(mpu_addr=71;mpu_addr<127;mpu_addr++){
   	  config.address=mpu_addr;
   	  ret = i2c_write(priv->i2c, &config, &regaddr, 1);
   	  if(ret>=0) break;
@@ -201,19 +201,19 @@ static int mpu6050_i2c_write(FAR struct mpu6050_dev_s *priv, uint8_t* regval,int
 
 //  /* Write 8 bits to device */
 
-//  uint8_t mpu_addr;
+  uint8_t mpu_addr;
 
-//    for(mpu_addr=0x00;mpu_addr<127;mpu_addr++){
-//  	  config.address=mpu_addr;
+    for(mpu_addr=71;mpu_addr<127;mpu_addr++){
+  	  config.address=mpu_addr;
   	  ret=i2c_write(priv->i2c, &config, regval, len);
-//  	  if(ret>=0) break;
-//    }
+  	  if(ret>=0) break;
+    }
 
   	  if (ret < 0)
   	    {
   	      syslog(LOG_ERR,"ERROR: i2c_write failed: %d\n", ret);
   	    }
-    syslog(LOG_INFO,"MPU-6050 found at: 0x%02X, writing 0x%02X %d\n", priv->addr,*regval);
+    syslog(LOG_INFO,"MPU-6050 found at: 0x%02X, writing 0x%02X %d\n", mpu_addr,*regval);
   return ret;
 }
 
@@ -384,8 +384,6 @@ int mpu6050_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   priv->i2c  = i2c;
   priv->addr = addr;
-
-  syslog(LOG_INFO, "INFO: MPU6050 ADDR = 0x%04X\n",priv->addr);
 
   uint8_t temp=0;
   ret=mpu6050_i2c_read(priv,MPUREG_WHOAMI,&temp,1);

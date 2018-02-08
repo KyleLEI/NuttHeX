@@ -58,8 +58,7 @@ int stm32_mpu6050initialize(FAR const char *devpath)
 
   /* Then register the device */
 
-  uint8_t addr=0x68;
-  ret = mpu6050_register(devpath, i2c, addr);
+  ret = mpu6050_register(devpath, i2c, 0x68);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Error registering MPU6050: %d\n", ret);
