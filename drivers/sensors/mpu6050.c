@@ -148,33 +148,25 @@ static int mpu6050_i2c_read(FAR struct mpu6050_dev_s *priv,
 
   /* Write the register address to read from */
 
-//  for(mpu_addr=71;mpu_addr<127;mpu_addr++){
-  	  config.address=priv->addr;
-  	ret = i2c_write(priv->i2c, &config, &regaddr, 1);
-//  	  if(ret>=0) break;
-//    }
-  	  if (ret < 0)
-  	    {
-  		  syslog(LOG_ERR,"i2c_read write part failed: %d\n", ret);
-  	      return ret;
-  	    }
+  config.address=priv->addr;
+  ret = i2c_write(priv->i2c, &config, &regaddr, 1);
 
-    syslog(LOG_INFO,"INFO: MPU-6050 found at: 0x%02X, reading reg 0x%02X\n", config.address,regaddr);
+  if (ret < 0)
+  {
+	  syslog(LOG_ERR,"i2c_read write part failed: %d\n", ret);
+	  return ret;
+  }
 
   /* Read "len" bytes from regaddr */
 
-//  for(mpu_addr=0x00;mpu_addr<127;mpu_addr++){
-//	  config.address=mpu_addr;
-	  ret = i2c_read(priv->i2c, &config, regval,len);
-//	  if(ret>=0) break;
-//  }
-	  if (ret < 0)
-	    	    {
-	    		  syslog(LOG_ERR,"i2c_write to failed: %d\n", ret);
-	    	      return ret;
-	    	    }
+  ret = i2c_read(priv->i2c, &config, regval,len);
 
-//  syslog(LOG_INFO,"INFO: MPU-6050 found at: 0x%02X, reading 0x%02X\n", mpu_addr,*regval);
+  if (ret < 0)
+  {
+	  syslog(LOG_ERR,"i2c_write to failed: %d\n", ret);
+	  return ret;
+  }
+
   return OK;
 }
 
@@ -197,22 +189,17 @@ static int mpu6050_i2c_write(FAR struct mpu6050_dev_s *priv, uint8_t* regval,int
   config.address   = priv->addr;
   config.addrlen   = 7;
 
-//  /* Write 8 bits to device */
+  /* Write 8 bits to device */
 
-//  uint8_t mpu_addr;
-//
-//    for(mpu_addr=71;mpu_addr<127;mpu_addr++){
-//  	  config.address=mpu_addr;
-    	  config.address=priv->addr;
-  	  ret=i2c_write(priv->i2c, &config, regval, len);
-//  	  if(ret>=0) break;
-//    }
+  ret=i2c_write(priv->i2c, &config, regval, len);
 
-  	  if (ret < 0)
-  	    {
-  	      syslog(LOG_ERR,"ERROR: i2c_write failed: %d\n", ret);
-  	    }
-    syslog(LOG_INFO,"MPU-6050 found at: 0x%02X, writing 0x%02X %d\n", config.address,*regval);
+  if (ret < 0)
+  {
+	  syslog(LOG_ERR,"ERROR: i2c_write failed: %d\n", ret);
+  }
+
+  syslog(LOG_INFO,"MPU-6050 found at: 0x%02X, writing 0x%02X %d\n", config.address,*regval);
+
   return ret;
 }
 
@@ -391,8 +378,7 @@ int mpu6050_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   	  syslog(LOG_ERR, "ERROR: Failed to read WHOAMI: %d\n",ret);
   	  return ret;
     }
-  	  syslog(LOG_INFO, "INFO: WHOAMI: [0x%02X]\n",temp);
-//  	  return ret;
+  syslog(LOG_INFO, "INFO: WHOAMI: [0x%02X]\n",temp);
 
   /* Activate the device and take it out of sleep mode */
 
