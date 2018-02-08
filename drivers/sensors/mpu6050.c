@@ -198,8 +198,6 @@ static int mpu6050_i2c_write(FAR struct mpu6050_dev_s *priv, uint8_t* regval,int
 	  syslog(LOG_ERR,"ERROR: i2c_write failed: %d\n", ret);
   }
 
-  syslog(LOG_INFO,"MPU-6050 found at: 0x%02X, writing 0x%02X %d\n", config.address,*regval);
-
   return ret;
 }
 
@@ -347,7 +345,7 @@ static ssize_t mpu6050_write(FAR struct file *filep,
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
-
+//TODO: somehow I2C needs a reset to work properly, strange
 int mpu6050_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                        uint8_t addr)
 {
@@ -371,14 +369,18 @@ int mpu6050_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   priv->i2c  = i2c;
   priv->addr = addr;
 
-  uint8_t temp=0;
-  ret=mpu6050_i2c_read(priv,MPUREG_WHOAMI,&temp,1);
+  uint8_t who=0;
+  ret=mpu6050_i2c_read(priv,MPUREG_WHOAMI,&who,1);
   if (ret < 0)
     {
-  	  syslog(LOG_ERR, "ERROR: Failed to read WHOAMI: %d\n",ret);
+  	  syslog(LOG_ERR, "ERROR: Failed to initialize MPU-6050: %d\n",ret);
   	  return ret;
     }
-  syslog(LOG_INFO, "INFO: WHOAMI: [0x%02X]\n",temp);
+
+  if(who!=MPU_WHOAMI_6050){
+	  syslog(LOG_ERR,"ERROR: MPU-6050 is not responding\n");
+	  return ret;
+  }
 
   /* Activate the device and take it out of sleep mode */
 
@@ -394,7 +396,7 @@ int mpu6050_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   ret = mpu6050_write8(priv, MPUREG_SMPLRT_DIV, CONFIG_MPU6050_SMPLRT);
   if (ret < 0)
   {
-	syslog(LOG_ERR, "ERROR: Failed to write MPUREG_SMPLRT_DIV!\n");
+	syslog(LOG_ERR, "ERROR: Failed to write MPUREG_SMPLRT_DIV: %d\n",ret);
 	return ret;
   }
 
@@ -403,7 +405,7 @@ int mpu6050_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   ret = mpu6050_write8(priv, MPUREG_ACCEL_CONFIG, CONFIG_MPU6050_ACCEL_RANGE<<3);
   if (ret < 0)
   {
-	  syslog(LOG_ERR,"ERROR: Failed to write MPUREG_SMPLRT_DIV!\n");
+	  syslog(LOG_ERR,"ERROR: Failed to write MPUREG_SMPLRT_DIV: %d\n",ret);
   	return ret;
   }
 
@@ -412,7 +414,7 @@ int mpu6050_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   ret = mpu6050_write8(priv, MPUREG_GYRO_CONFIG, CONFIG_MPU6050_ACCEL_RANGE<<3);
   if (ret < 0)
   {
-	  syslog(LOG_ERR,"ERROR: Failed to write MPUREG_SMPLRT_DIV!\n");
+	  syslog(LOG_ERR,"ERROR: Failed to write MPUREG_SMPLRT_DIV: %d\n",ret);
     	return ret;
   }
 
