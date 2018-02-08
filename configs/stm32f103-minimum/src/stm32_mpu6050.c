@@ -48,7 +48,7 @@ int stm32_mpu6050initialize(FAR const char *devpath)
 
   /* Initialize I2C */
 
-  i2c = stm32_i2cbus_initialize(2);
+  i2c = stm32_i2cbus_initialize(1);
 
   if (!i2c)
     {
@@ -58,7 +58,7 @@ int stm32_mpu6050initialize(FAR const char *devpath)
 
   /* Then register the device */
 
-  ret = mpu6050_register(devpath, i2c, 0xAA);//FIXME: wrong address
+  ret = mpu6050_register(devpath, i2c, 0x68);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Error registering MPU6050: %d\n", ret);
