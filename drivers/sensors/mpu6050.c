@@ -20,6 +20,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/signal.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/mpu6050.h>
 
@@ -345,7 +346,7 @@ static ssize_t mpu6050_write(FAR struct file *filep,
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
-//TODO: somehow I2C needs a reset to work properly, strange
+
 int mpu6050_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                        uint8_t addr)
 {
@@ -368,6 +369,8 @@ int mpu6050_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   priv->i2c  = i2c;
   priv->addr = addr;
+
+  nxsig_usleep(10);//TODO: sleep magically fixed the problem, needs further investigation
 
   uint8_t who=0;
   ret=mpu6050_i2c_read(priv,MPUREG_WHOAMI,&who,1);

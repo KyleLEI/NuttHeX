@@ -62,6 +62,7 @@ int stm32_mpu6050initialize(FAR const char *devpath)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Error registering MPU6050: %d\n", ret);
+      return -ENODEV;
     }
 
   return ret;
