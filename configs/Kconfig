@@ -1478,6 +1478,15 @@ config ARCH_BOARD_ZKITARM
 	---help---
 		Zilogic System's ARM development Kit, ZKIT-ARM-1769.  This board is based
 		on the NXP LPC1769.  The Nuttx Buildroot toolchain is used by default.
+		
+config ARCH_BOARD_RMDEVBOARD
+	bool "RoboMasters Development Board"
+	depends on ARCH_CHIP_STM32F427I
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		Robomasters development board based on the STMicro STM32F427II MCU.
 
 config ARCH_BOARD_SIM
 	bool "User mode simulation"
@@ -1701,6 +1710,7 @@ config ARCH_BOARD
 	default "zkit-arm-1769"            if ARCH_BOARD_ZKITARM
 	default "sim"                      if ARCH_BOARD_SIM
 	default "moxa"                     if ARCH_BOARD_MOXA
+	default "RMDevBoard"               if ARCH_BOARD_RMDEVBOARD
 
 comment "Common Board Options"
 
@@ -2156,6 +2166,9 @@ source "configs/zp214xpa/Kconfig"
 endif
 if ARCH_BOARD_ZKITARM
 source "configs/zkit-arm-1769/Kconfig"
+endif
+if ARCH_BOARD_RMDEVBOARD
+source "configs/RMDevBoard/Kconfig"
 endif
 if ARCH_BOARD_SIM
 source "configs/sim/Kconfig"
