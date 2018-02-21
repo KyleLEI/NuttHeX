@@ -170,6 +170,7 @@
 /* The board has only one controllable LED */
 
 #define LED_STARTED       0  /* No LEDs */
+#define LED_IDLE          1  /* LED1 on */
 #define LED_HEAPALLOCATE  1  /* LED1 on */
 #define LED_IRQSENABLED   2  /* LED2 on */
 #define LED_STACKCREATED  3  /* LED1 on */

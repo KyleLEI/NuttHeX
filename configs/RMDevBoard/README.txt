@@ -2,33 +2,17 @@ README
 ======
 
 This README discusses issues unique to NuttX configurations for the
-STMicro STM32F429I-DISCO development board featuring the STM32F429ZIT6
-MCU. The STM32F429ZIT6 is a 180MHz Cortex-M4 operation with 2Mbit Flash
+Robomasters development board featuring the STM32F427IIH6
+MCU. The STM32F427IIH6 is a 180MHz Cortex-M4 operation with 2Mbit Flash
 memory and 256kbytes. The board features:
 
   - On-board ST-LINK/V2 for programming and debugging,
-  - On-board 64 Mbits (8 Mbytes) External SDRAM (1 Mbit x 16-bit x 4-bank)
-  - L3GD20, ST MEMS motion sensor, 3-axis digital output gyroscope,
-  - TFT 2.4" LCD, 262K color RGB, 240 x 320 pixels
-  - Touchscreen controller
-  - Two user LEDs and two push-buttons,
+  - Two user LEDs and one push-button,
   - USB OTG FS with micro-AB connector, and
   - Easy access to most MCU pins.
 
-NOTE:  Includes basic NSH command support with full 8MByte SDRAM + the
-       internal 256K.  Unsupported are the LCD and USB interfaces.
-
-       The board pin configuration to support on-board SDRAM and LCD
-       prevents use of the OTG FS module which is normally used for USB
-       NSH sessions.  Instead, the board routes the OTG HS pins to the
-       USB OTG connector.
-
-       The NSH configuration / testing that has been done so far was
-       performed by connecting an external RS-232 line driver to pins
-       PA9 (TX) and PA10 (RX) and configuring USART1 as the NSH console.
-
-Refer to the http://www.st.com website for further information about this
-board (search keyword: 429i-disco)
+Refer to the http://www.robomaster.com website for further information about this
+board
 
 Contents
 ========
@@ -42,7 +26,7 @@ Contents
   - Timer Inputs/Outputs
   - FPU
   - FSMC SRAM
-  - STM32F429I-DISCO-specific Configuration Options
+  - RMDevBoard-specific Configuration Options
   - Configurations
 
 Development Environment
@@ -101,33 +85,6 @@ FLASH may be programmed:
     Pins 4, 45, 8, 10, 12, 14, 16, 18 and 20 are GND pins in J-Link.  They
     should also be connected to ground in the target system.
 
-LEDs
-====
-
-The STM32F429I-DISCO board has two user LEDs; green, and red on the board.
-These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
-defined.  In that case, the usage by the board port is defined in
-include/board.h and src/up_leds.c. The LEDs are used to encode OS-related
-events as follows:
-
-  SYMBOL                Meaning                 LED1*    LED2
-                                                green    red
-  -------------------  -----------------------  -------  -------
-  LED_STARTED          NuttX has been started   ON       OFF
-  LED_HEAPALLOCATE     Heap has been allocated  OFF      ON
-  LED_IRQSENABLED      Interrupts enabled       ON       ON
-  LED_STACKCREATED     Idle stack created       OFF      ON
-  LED_INIRQ            In an interrupt**        ON       ON
-  LED_SIGNAL           In a signal handler      N/C      ON
-  LED_ASSERTION        An assertion failed      ON       ON
-  LED_PANIC            The system has crashed   ON       BLINK
-  LED_IDLE             STM32 is is sleep mode   (Optional, not used)
-
-  * In normal mode, LED1 will be on and LED2 might flicker a bit as IRQs
-    and SIGNALS are processed.
-  * If LED1 is on and LED2 is blinking, then NuttX probably failed to boot
-    or is in a PANIC condition.
-
 UARTs
 =====
 
@@ -181,19 +138,17 @@ UART7
 Default Serial Console
 ----------------------
 
-USART1 is enabled as the serial console in all configurations (see */defconfig).
-USART1 RX and TX are configured on pins PA10 and PA9, respectively (see
+USART3 is enabled as the serial console in all configurations (see */defconfig).
+USART3 RX and TX are configured on pins PD9 and PD8, respectively (see
 include/board.h).
 
-  Header 32X2 P1
+  Header 5P P6
   --------------
-  Pin 1  5V
-  Pin 51 PA10
-  Pin 52 PA9
-  Pin 63 GND
-
-If solder bridges SB11 and SB12 are closed, then USART1 will be connected to
-the ST-Link and should be available over USB as a virtual COM interface.
+  Pin 1  GND
+  Pin 2  PD9
+  Pin 3  5V
+  Pin 4  PD8
+  Pin 5  GND
 
 Timer Inputs/Outputs
 ====================
@@ -323,7 +278,7 @@ See the section above on Toolchains, NOTE 2, for explanations for some of
 the configuration settings.  Some of the usual settings are just not supported
 by the "Lite" version of the Atollic toolchain.
 
-FMC SDRAM
+FMC SDRAM (To be implemented)
 =========
 
 On-board SDRAM
@@ -644,70 +599,14 @@ STM32F429I-DISCO-specific Configuration Options
 Configurations
 ==============
 
-Each STM32F429I-DISCO configuration is maintained in a sub-directory and
+Each RMDevBoard configuration is maintained in a sub-directory and
 can be selected as follow:
 
     cd tools
-    ./configure.sh STM32F429I-DISCO/<subdir>
+    ./configure.sh RMDevBoard/<subdir>
     cd -
 
 Where <subdir> is one of the following:
-
-  extflash:
-  ---------
-
-    This is another NSH example.  If differs from other 'nsh' configurations
-    in that this configuration defines an external 8 MByte SPI FLASH (the
-    SST25VF064C part from Silicon Storage Technology, Inc.) which must be
-    be connected to the Discovery board's SPI4 pins on the expansion pins.
-    Additionally, this demo uses UART1 for the console
-
-    NOTES:
-
-    1. This configuration assumes an SST25VF064C 8Mbyte SPI FLASH is
-       connected to SPI4 on the following Discovery board Pins:
-
-         SCK:   Port PE2   Board Connector P1, Pin 15
-         MOSI:  Port PE6   Board Connector P1, Pin 11
-         MISO:  Port PE5   Board Connector P1, Pin 14
-         CS:    Port PE4   Board Connector P1, Pin 13
-
-    2. This configuration does have UART1 output enabled and set up as
-       the system logging device.  To use this UART, you must add an
-       external RS-232 line driver to the UART1 pins of the DISCO board
-       on PA9 and PA10 of connector P1.
-
-  fb
-  --
-
-    STM32F429I-DISCO LTDC Framebuffer demo example.  This is a simple
-    configuration used for some basic (non-graphic) debug of the framebuffer
-    character drivers using apps/examples/fb.  It simply opens the framebuffer
-    device and draws concentric rectangles of different colors in the
-    framebuffer:
-
-      nsh> fb
-
-    Also included is the touchscreen test of apps/examples/touchscreen.  This
-    example will simply open the touchscreen driver then collect and display
-    touch inputs:
-
-      nsh> tc 1
-      tc_main: nsamples: 1
-      tc_main: Initializing external touchscreen device
-      tc_main: Opening /dev/input0
-      Sample     :
-         npoints : 1
-      Point 1    :
-              id : 0
-           flags : 3c
-               x : 2296
-               y : 2311
-               h : 0
-               w : 0
-        pressure : 1
-      Terminating!
-      nsh>
 
   nsh:
   ---
@@ -949,95 +848,7 @@ Where <subdir> is one of the following:
        2015-04-30
           Appears to be fully functional.
 
-  nx
-  --
-
-    This a simple test using the graphic example at apps/example/nx.  This
-    configuration illustrates the use of the LCD with the lower performance
-    SPI interface.
-
-  nxwm
-  ----
-    This is a special configuration setup for the NxWM window manager
-    UnitTest.
-
-    NOTES:
-
-    1. The NxWM window manager can be found here:
-
-         nuttx-code/NxWidgets/nxwm
-
-       The NxWM unit test can be found at:
-
-         nuttx-code/NxWidgets/UnitTests/nxwm
-
-       Documentation for installing the NxWM unit test can be found here:
-
-         nuttx-code/NxWidgets/UnitTests/README.txt
-
-    2. Here is the quick summary of the build steps (Assuming that all of
-       the required packages are available in a directory ~/nuttx-code):
-
-       1. Install the nxwm configuration
-
-          $ cd ~/nuttx-code/nuttx
-          $ tools/configure.sh -l stm32f429i-disco/nxwm
-
-          When the -l option on configure.sh indicates that you are
-          configuring for a Linux host build environment.   Try
-          'tools/configure.sh -h' for other options.
-
-       2. Make the build context (only)
-
-          $ make context
-          ...
-
-       3. Install the nxwm unit test
-
-          $ cd ~/nuttx-code/NxWidgets
-          $ tools/install.sh ~/nuttx-code/apps nxwm
-          Creating symbolic link
-           - To ~/nuttx-code/NxWidgets/UnitTests/nxwm
-           - At ~/nuttx-code/apps/external
-
-       4. Build the NxWidgets library
-
-          $ cd ~/nuttx-code/NxWidgets/libnxwidgets
-          $ make TOPDIR=~/nuttx-code/nuttx
-         ...
-
-       5. Build the NxWM library
-
-          $ cd ~/nuttx-code/NxWidgets/nxwm
-          $ make TOPDIR=~/nuttx-code/nuttx
-          ...
-
-       6. Built NuttX with the installed unit test as the application
-
-          $ cd ~/nuttx-code/nuttx
-          $ make
-
-    STATUS:
-      17-01-08:  There are instabilities in this configuration that make it
-        not usable on this platform.  While the equivalent configuration works
-        on other platforms, this one does not:  The calculator display does
-        not form properly.  There are fails in the NxTerm display, usually
-        around the point where the display should scroll up.
-
-        Update:  With all optimizations disabled, the issue seems to go away.
-        So this is most likely due to using high levels of optimization with a
-        bleeding edge GCC toolchain.
-      17-11-15: The original configuration used the slower SPI LCD interface.
-        The configuration was converted to use the high performance LTDC frame
-        buffer interface.  Performance is now excellent and I see none of the
-        instabilities mentioned above even at high levels of optimization.
-
-        The difficulty that I experienced was touching the tiny icons on the
-        menus.  The touscreen controller (along with my fat fingers) does not
-        appear to have sufficient precision to work in this way.  Larger icons
-        would likely make the interface easier to use.
-
-  usbnsh:
+  usbnsh: (To be implemented)
   ------
 
     This is another NSH example.  If differs from other 'nsh' configurations
@@ -1060,23 +871,3 @@ Where <subdir> is one of the following:
        the system logging device.  To use this UART, you must add an
        external RS-232 line driver to the UART1 pins of the DISCO board
        on PA9 and PA10 of connector P1.
-
-  usbmsc:
-  ------
-
-    This is an example of enabling the FS OTG port on the DISCO board for
-    mass storage use.  It provides an NSH session on UART1 to allow
-    accessing the connected USB mass storage device.  Such a configuration
-    is useful on the stm32f429i-disco which has no onboard SD card or mass
-    storage solution.
-
-    NOTES:
-
-    1. This configuration uses UART1 as the system console.  To use this
-       UART, you must add an external RS-232 line driver to the UART1 pins
-       of the DISCO board on PA9 and PA10 of connector P1.
-
-    2. The mass storage device will appear as /dev/sda and supports FAT
-       formatted "thumb" flash drives with:
-
-          nsh> mount -t vfat /dev/sda /mount_name

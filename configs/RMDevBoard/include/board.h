@@ -3,7 +3,9 @@
  * include/arch/board/board.h
  *
  *   Copyright (C) 2012, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Kyle Lei. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   		 Kyle Lei <leizhao2@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,18 +58,18 @@
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
-/* The STM32F4 Discovery board features a single 8MHz crystal.  Space is provided
+/* The Robomaster Development board features a single 12MHz crystal.  Space is provided
  * for a 32kHz RTC backup crystal, but it is not stuffed.
  *
  * This is the canonical configuration:
  *   System Clock source           : PLL (HSE)
- *   SYSCLK(Hz)                    : 180000000    Determined by PLL configuration
- *   HCLK(Hz)                      : 180000000    (STM32_RCC_CFGR_HPRE)
+ *   SYSCLK(Hz)                    : 168000000    Determined by PLL configuration
+ *   HCLK(Hz)                      : 168000000    (STM32_RCC_CFGR_HPRE)
  *   AHB Prescaler                 : 1            (STM32_RCC_CFGR_HPRE)
  *   APB1 Prescaler                : 4            (STM32_RCC_CFGR_PPRE1)
  *   APB2 Prescaler                : 2            (STM32_RCC_CFGR_PPRE2)
- *   HSE Frequency(Hz)             : 8000000      (STM32_BOARD_XTAL)
- *   PLLM                          : 8            (STM32_PLLCFG_PLLM)
+ *   HSE Frequency(Hz)             : 12000000      (STM32_BOARD_XTAL)
+ *   PLLM                          : 12            (STM32_PLLCFG_PLLM)
  *   PLLN                          : 336          (STM32_PLLCFG_PLLN)
  *   PLLP                          : 2            (STM32_PLLCFG_PLLP)
  *   PLLQ                          : 7            (STM32_PLLCFG_PLLQ)
@@ -82,22 +84,22 @@
 
 /* HSI - 16 MHz RC factory-trimmed
  * LSI - 32 KHz RC
- * HSE - On-board crystal frequency is 8MHz
- * LSE - 32.768 kHz
+ * HSE - On-board crystal frequency is 12MHz
+ * LSE - not installed
  */
 
-#define STM32_BOARD_XTAL        8000000ul
+#define STM32_BOARD_XTAL        12000000ul
 
 #define STM32_HSI_FREQUENCY     16000000ul
 #define STM32_LSI_FREQUENCY     32000
 #define STM32_HSE_FREQUENCY     STM32_BOARD_XTAL
-#define STM32_LSE_FREQUENCY     32768
+//#define STM32_LSE_FREQUENCY     32768
 
 /* Main PLL Configuration.
  *
  * PLL source is HSE
  * PLL_VCO = (STM32_HSE_FREQUENCY / PLLM) * PLLN
- *         = (8,000,000 / 8) * 336
+ *         = (12,000,000 / 12) * 336
  *         = 336,000,000
  * SYSCLK  = PLL_VCO / PLLP
  *         = 336,000,000 / 2 = 168,000,000
@@ -106,7 +108,7 @@
  *         = 48,000,000
  */
 
-#define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(8)
+#define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(12)
 #define STM32_PLLCFG_PLLN       RCC_PLLCFG_PLLN(336)
 #define STM32_PLLCFG_PLLP       RCC_PLLCFG_PLLP_2
 #define STM32_PLLCFG_PLLQ       RCC_PLLCFG_PLLQ(7)
@@ -153,15 +155,20 @@
  * otherwise frequency is 2xAPBx.
  * Note: TIM1,8 are on APB2, others on APB1
  */
-
-#define BOARD_TIM1_FREQUENCY    STM32_HCLK_FREQUENCY
-#define BOARD_TIM2_FREQUENCY    (STM32_HCLK_FREQUENCY/2)
-#define BOARD_TIM3_FREQUENCY    (STM32_HCLK_FREQUENCY/2)
-#define BOARD_TIM4_FREQUENCY    (STM32_HCLK_FREQUENCY/2)
-#define BOARD_TIM5_FREQUENCY    (STM32_HCLK_FREQUENCY/2)
-#define BOARD_TIM6_FREQUENCY    (STM32_HCLK_FREQUENCY/2)
-#define BOARD_TIM7_FREQUENCY    (STM32_HCLK_FREQUENCY/2)
-#define BOARD_TIM8_FREQUENCY    STM32_HCLK_FREQUENCY
+#define BOARD_TIM1_FREQUENCY    STM32_APB2_TIM1_CLKIN
+#define BOARD_TIM2_FREQUENCY    STM32_APB1_TIM2_CLKIN
+#define BOARD_TIM3_FREQUENCY    STM32_APB1_TIM3_CLKIN
+#define BOARD_TIM4_FREQUENCY    STM32_APB1_TIM4_CLKIN
+#define BOARD_TIM5_FREQUENCY    STM32_APB1_TIM5_CLKIN
+#define BOARD_TIM6_FREQUENCY    STM32_APB1_TIM6_CLKIN
+#define BOARD_TIM7_FREQUENCY    STM32_APB1_TIM7_CLKIN
+#define BOARD_TIM8_FREQUENCY    STM32_APB2_TIM8_CLKIN
+#define BOARD_TIM9_FREQUENCY    STM32_APB2_TIM9_CLKIN
+#define BOARD_TIM10_FREQUENCY   STM32_APB2_TIM10_CLKIN
+#define BOARD_TIM11_FREQUENCY   STM32_APB2_TIM11_CLKIN
+#define BOARD_TIM12_FREQUENCY   STM32_APB1_TIM12_CLKIN
+#define BOARD_TIM13_FREQUENCY   STM32_APB1_TIM13_CLKIN
+#define BOARD_TIM14_FREQUENCY   STM32_APB1_TIM14_CLKIN
 
 /* LED definitions ******************************************************************/
 /* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
@@ -183,7 +190,7 @@
 #define BOARD_LED2_BIT    (1 << BOARD_LED2)
 
 /* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 4 LEDs on board the
- * stm32f429i-disco.  The following definitions describe how NuttX controls the LEDs:
+ * RMDevBoard.  The following definitions describe how NuttX controls the LEDs:
  */
 
 #define LED_STARTED       0  /* LED1 */
@@ -206,15 +213,31 @@
 
 /* Alternate function pin selections ************************************************/
 
+#define GPIO_USART1_RX   GPIO_USART1_RX_1
+#define GPIO_USART1_TX   0
+
 /* USART3:*/
 
-#define GPIO_USART3_RX GPIO_USART3_RX_3
-#define GPIO_USART3_TX GPIO_USART3_TX_3
+#define GPIO_USART3_RX   GPIO_USART3_RX_3
+#define GPIO_USART3_TX   GPIO_USART3_TX_3
+#define GPIO_USART3_RTS  GPIO_USART3_RTS_2
+#define GPIO_USART3_CTS  GPIO_USART3_CTS_2
 
 /* USART6:*/
 
 #define GPIO_USART6_RX GPIO_USART6_RX_2
 #define GPIO_USART6_TX GPIO_USART6_TX_2
+
+/* CAN
+ *
+ * CAN1 is routed to the onboard transceiver.
+ * CAN2 is routed to the expansion connector.
+ */
+
+#define GPIO_CAN1_RX     GPIO_CAN1_RX_3
+#define GPIO_CAN1_TX     GPIO_CAN1_TX_3
+#define GPIO_CAN2_RX     GPIO_CAN2_RX_1
+#define GPIO_CAN2_TX     GPIO_CAN2_TX_2
 
 /* PWM
  *
@@ -248,188 +271,6 @@
 
 #define GPIO_TIM8_CH1IN  GPIO_TIM8_CH1IN_1
 #define GPIO_TIM8_CH2IN  GPIO_TIM8_CH2IN_1
-
-#ifdef CONFIG_STM32_LTDC
-# ifdef CONFIG_RMDEVBOARD_ILI9341_FBIFACE
-
-/* LCD
- *
- * The STM32F429I-DISCO board contains an onboard TFT LCD connected to the
- * LTDC interface of the uC.  The LCD is 240x320 pixels. Define the parameters
- * of the LCD and the interface here.
- */
-
-/* Panel configuration
- *
- * LCD Panel is Saef Technology Limited (SF-TC240T-9229A2-T) with integrated
- * Ilitek ILI9341 LCD Single Chip Driver (240RGBx320)
- *
- * PLLSAI settings
- * PLLSAIN                : 192
- * PLLSAIR                : 4
- * PLLSAIQ                : 7
- * PLLSAIDIVR             : 8
- *
- * Timings
- * Horicontal Front Porch : 10  (STM32_LTDC_HFP)
- * Horicontal Back Porch  : 20  (STM32_LTDC_HBP)
- * Vertical Front Porch   :  4  (STM32_LTDC_VFP)
- * Vertical Back Porch    :  2  (STM32_LTDC_VBP)
- *
- * Horicontal Sync        : 10  (STM32_LTDC_HSYNC)
- * Vertical Sync          :  4  (STM32_LTDC_VSYNC)
- *
- * Active Width           : 240 (STM32_LTDC_ACTIVEW)
- * Active Height          : 320 (STM32_LTDC_ACTIVEH)
- */
-
-/* LTDC PLL configuration
- *
- * PLLSAI_VCO = STM32_HSE_FREQUENCY / PLLM
- *            = 8000000ul / 8
- *            = 1,000,000
- *
- * PLL LCD clock output
- *            = PLLSAI_VCO * PLLSAIN / PLLSAIR / PLLSAIDIVR
- *            = 1,000,000 * 192 / 4 /8
- *            = 6,000,000
- */
-
-/* Defined panel settings */
-
-#if defined(CONFIG_RMDEVBOARD_ILI9341_FBIFACE_LANDSCAPE) || \
-    defined(CONFIG_RMDEVBOARD_ILI9341_FBIFACE_RLANDSCAPE)
-# define BOARD_LTDC_WIDTH               320
-# define BOARD_LTDC_HEIGHT              240
-#else
-# define BOARD_LTDC_WIDTH               240
-# define BOARD_LTDC_HEIGHT              320
-#endif
-
-#define BOARD_LTDC_OUTPUT_BPP           16
-#define BOARD_LTDC_HFP                  10
-#define BOARD_LTDC_HBP                  20
-#define BOARD_LTDC_VFP                  4
-#define BOARD_LTDC_VBP                  2
-#define BOARD_LTDC_HSYNC                10
-#define BOARD_LTDC_VSYNC                2
-
-#define BOARD_LTDC_PLLSAIN              192
-#define BOARD_LTDC_PLLSAIR              4
-#define BOARD_LTDC_PLLSAIQ              7
-
-/* Division factor for LCD clock */
-
-#define STM32_RCC_DCKCFGR_PLLSAIDIVR    RCC_DCKCFGR_PLLSAIDIVR_DIV8
-
-/* Pixel Clock Polarity */
-#define BOARD_LTDC_GCR_PCPOL            0 /* !LTDC_GCR_PCPOL */
-/* Data Enable Polarity */
-#define BOARD_LTDC_GCR_DEPOL            0 /* !LTDC_GCR_DEPOL */
-/* Vertical Sync Polarity */
-#define BOARD_LTDC_GCR_VSPOL            0 /* !LTDC_GCR_VSPOL */
-/* Horicontal Sync Polarity */
-#define BOARD_LTDC_GCR_HSPOL            0 /* !LTDC_GCR_HSPOL */
-
-/* GPIO pinset */
-
-#define GPIO_LTDC_PINS                  18 /* 18-bit display */
-
-#define GPIO_LTDC_R2                    GPIO_LTDC_R2_1
-#define GPIO_LTDC_R3                    GPIO_LTDC_R3_1
-#define GPIO_LTDC_R4                    GPIO_LTDC_R4_1
-#define GPIO_LTDC_R5                    GPIO_LTDC_R5_1
-#define GPIO_LTDC_R6                    GPIO_LTDC_R6_1
-#define GPIO_LTDC_R7                    GPIO_LTDC_R7_1
-
-#define GPIO_LTDC_G2                    GPIO_LTDC_G2_1
-#define GPIO_LTDC_G3                    GPIO_LTDC_G3_1
-#define GPIO_LTDC_G4                    GPIO_LTDC_G4_1
-#define GPIO_LTDC_G5                    GPIO_LTDC_G5_1
-#define GPIO_LTDC_G6                    GPIO_LTDC_G6_1
-#define GPIO_LTDC_G7                    GPIO_LTDC_G7_1
-
-#define GPIO_LTDC_B2                    GPIO_LTDC_B2_1
-#define GPIO_LTDC_B3                    GPIO_LTDC_B3_1
-#define GPIO_LTDC_B4                    GPIO_LTDC_B4_1
-#define GPIO_LTDC_B5                    GPIO_LTDC_B5_1
-#define GPIO_LTDC_B6                    GPIO_LTDC_B6_1
-#define GPIO_LTDC_B7                    GPIO_LTDC_B7_1
-
-#define GPIO_LTDC_VSYNC                 GPIO_LTDC_VSYNC_1
-#define GPIO_LTDC_HSYNC                 GPIO_LTDC_HSYNC_1
-#define GPIO_LTDC_DE                    GPIO_LTDC_DE_1
-#define GPIO_LTDC_CLK                   GPIO_LTDC_CLK_1
-
-#else
-/* Custom LCD display configuration */
-
-# define BOARD_LTDC_WIDTH               ???
-# define BOARD_LTDC_HEIGHT              ???
-
-#define BOARD_LTDC_HFP                  ???
-#define BOARD_LTDC_HBP                  ???
-#define BOARD_LTDC_VFP                  ???
-#define BOARD_LTDC_VBP                  ???
-#define BOARD_LTDC_HSYNC                ???
-#define BOARD_LTDC_VSYNC                ???
-
-#define BOARD_LTDC_PLLSAIN              ???
-#define BOARD_LTDC_PLLSAIR              ???
-#define BOARD_LTDC_PLLSAIQ              ???
-
-/* Division factor for LCD clock */
-
-#define STM32_RCC_DCKCFGR_PLLSAIDIVR    ???
-
-/* Pixel Clock Polarity */
-#define BOARD_LTDC_GCR_PCPOL            ???
-/* Data Enable Polarity */
-#define BOARD_LTDC_GCR_DEPOL            ???
-/* Vertical Sync Polarity */
-#define BOARD_LTDC_GCR_VSPOL            ???
-/* Horicontal Sync Polarity */
-#define BOARD_LTDC_GCR_HSPOL            ???
-
-/* GPIO pinset */
-
-#define GPIO_LTDC_PINS                  ???
-
-#define GPIO_LTDC_R2                    ???
-#define GPIO_LTDC_R3                    ???
-#define GPIO_LTDC_R4                    ???
-#define GPIO_LTDC_R5                    ???
-#define GPIO_LTDC_R6                    ???
-#define GPIO_LTDC_R7                    ???
-
-#define GPIO_LTDC_G2                    ???
-#define GPIO_LTDC_G3                    ???
-#define GPIO_LTDC_G4                    ???
-#define GPIO_LTDC_G5                    ???
-#define GPIO_LTDC_G6                    ???
-#define GPIO_LTDC_G7                    ???
-
-#define GPIO_LTDC_B2                    ???
-#define GPIO_LTDC_B3                    ???
-#define GPIO_LTDC_B4                    ???
-#define GPIO_LTDC_B5                    ???
-#define GPIO_LTDC_B6                    ???
-#define GPIO_LTDC_B7                    ???
-
-#define GPIO_LTDC_VSYNC                 ???
-#define GPIO_LTDC_HSYNC                 ???
-#define GPIO_LTDC_DE                    ???
-#define GPIO_LTDC_CLK                   ???
-
-#endif /* Custom LCD display */
-
-/* Configure PLLSAI */
-
-#define STM32_RCC_PLLSAICFGR_PLLSAIN    RCC_PLLSAICFGR_PLLSAIN(BOARD_LTDC_PLLSAIN)
-#define STM32_RCC_PLLSAICFGR_PLLSAIR    RCC_PLLSAICFGR_PLLSAIR(BOARD_LTDC_PLLSAIR)
-#define STM32_RCC_PLLSAICFGR_PLLSAIQ    RCC_PLLSAICFGR_PLLSAIQ(BOARD_LTDC_PLLSAIQ)
-
-#endif /* CONFIG_STM32_LTDC */
 
 /************************************************************************************
  * Public Data

@@ -29,5 +29,9 @@ Continue by uploading the built nuttx to the MCU
 ### Features config: 
 \<board\>/\<config\>/defconfig
 
+## New Board Support
+
+ - Robomasters Development Board
+
 ## New Device Driver
  - MPU6050

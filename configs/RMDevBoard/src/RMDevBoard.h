@@ -127,9 +127,9 @@
 /* LEDs */
 
 #define GPIO_LED1       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                         GPIO_OUTPUT_CLEAR|GPIO_PORTF|GPIO_PIN14)
-#define GPIO_LED2       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                          GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN7)
+#define GPIO_LED2       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTF|GPIO_PIN14)
 
 /* BUTTONS -- NOTE that all have EXTI interrupts configured */
 
@@ -251,32 +251,6 @@ void weak_function stm32_usbinitialize(void);
 
 #if defined(CONFIG_STM32_OTGHS) && defined(CONFIG_USBHOST)
 int stm32_usbhost_initialize(void);
-#endif
-
-/****************************************************************************
-
- * Name: stm32_enablefsmc
- *
- * Description:
- *  enable clocking to the FSMC module
- *
- ****************************************************************************/
-
-#ifdef CONFIG_STM32_FSMC
-void stm32_enablefsmc(void);
-#endif
-
-/****************************************************************************
-
- * Name: stm32_disablefsmc
- *
- * Description:
- *  enable clocking to the FSMC module
- *
- ****************************************************************************/
-
-#ifdef CONFIG_STM32_FSMC
-void stm32_disablefsmc(void);
 #endif
 
 /****************************************************************************
