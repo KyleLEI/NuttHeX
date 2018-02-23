@@ -49,10 +49,6 @@
 # include <stdint.h>
 #endif
 
-#include "stm32_rcc.h"
-#include "stm32_sdio.h"
-#include "stm32.h"
-
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
@@ -194,6 +190,7 @@
  */
 
 #define LED_STARTED       0  /* LED1 */
+#define LED_IDLE          1  /* LED2 */
 #define LED_HEAPALLOCATE  1  /* LED2 */
 #define LED_IRQSENABLED   2  /* LED1 + LED2 */
 #define LED_STACKCREATED  3  /* LED3 */

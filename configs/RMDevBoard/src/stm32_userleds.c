@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm32f429i-disco/src/stm32_userleds.c
+ * configs/RMDevBoard/src/stm32_userleds.c
  *
  *   Copyright (C) 2011, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
