@@ -1,9 +1,10 @@
 /****************************************************************************
- * configs/stm32f429i-disco/src/stm32f429i-disco.h
+ * configs/RMDevBoard/src/RMDevBoard.h
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Marco Krahl <ocram.lhark@gmail.com>
+ *            Kyle Lei <leizhao2@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -137,7 +138,7 @@
 #define MAX_IRQBUTTON   BUTTON_USER
 #define NUM_IRQBUTTONS  1
 
-#define GPIO_BTN_USER   (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTA|GPIO_PIN0)
+#define GPIO_BTN_USER   (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTD|GPIO_PIN10)
 
 /* PWM
  *

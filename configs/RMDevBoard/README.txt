@@ -32,7 +32,7 @@ Contents
 Development Environment
 =======================
 
-The Development environments for the STM32F429I-DISCO board are identical
+The Development environments for the Robomasters Development Board are identical
 to the environments for other STM32F boards.  For full details on the
 environment options and setup, see the README.txt file in the
 config/stm32f4discovery directory.
@@ -40,8 +40,8 @@ config/stm32f4discovery directory.
 Setup and Programming Flash
 ===========================
 
-I use a USB cable to power and program it.  And I use a USB/Serial
-connected to pins PA9 and PA10 for the serial console (See the section
+I use a USB cable or a RM power breakout board to power it.  And I use a USB/Serial
+connected to the header UART3 for the serial console (See the section
 "UARTs" below).
 
 FLASH may be programmed:

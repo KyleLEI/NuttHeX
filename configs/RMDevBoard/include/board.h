@@ -200,7 +200,7 @@
 #define LED_PANIC         7  /* N/C  + N/C  + N/C + LED4 */
 
 /* Button definitions ***************************************************************/
-/* The STM32F4 Discovery supports one button: */
+/* RMDevBoard supports one button: */
 
 #define BUTTON_USER        0
 
@@ -210,25 +210,29 @@
 
 /* Alternate function pin selections ************************************************/
 
-#define GPIO_USART1_RX   GPIO_USART1_RX_1
+/* USART1: DBUS*/
+
+#define GPIO_USART1_RX   GPIO_USART1_RX_2
 #define GPIO_USART1_TX   0
 
-/* USART3:*/
+/* USART2: Bluetooth*/
 
 #define GPIO_USART3_RX   GPIO_USART3_RX_3
 #define GPIO_USART3_TX   GPIO_USART3_TX_3
-#define GPIO_USART3_RTS  GPIO_USART3_RTS_2
-#define GPIO_USART3_CTS  GPIO_USART3_CTS_2
 
-/* USART6:*/
+/* USART3: Serial*/
+
+#define GPIO_USART3_RX   GPIO_USART3_RX_3
+#define GPIO_USART3_TX   GPIO_USART3_TX_3
+
+/* USART6: Serial*/
 
 #define GPIO_USART6_RX GPIO_USART6_RX_2
 #define GPIO_USART6_TX GPIO_USART6_TX_2
 
 /* CAN
  *
- * CAN1 is routed to the onboard transceiver.
- * CAN2 is routed to the expansion connector.
+ * Somehow DJI loves CAN
  */
 
 #define GPIO_CAN1_RX     GPIO_CAN1_RX_3
@@ -249,17 +253,11 @@
 #define GPIO_I2C3_SCL GPIO_I2C3_SCL_1
 #define GPIO_I2C3_SDA GPIO_I2C3_SDA_1
 
-/* SPI - There is a MEMS device on SPI5 using these pins: */
+/* SPI - MPU6500 is on SPI5 using these pins: */
 
 #define GPIO_SPI5_MISO GPIO_SPI5_MISO_1
 #define GPIO_SPI5_MOSI GPIO_SPI5_MOSI_1
 #define GPIO_SPI5_SCK  GPIO_SPI5_SCK_1
-
-/* SPI - External SPI flash may be connected on SPI4: */
-
-#define GPIO_SPI4_MISO GPIO_SPI4_MISO_1
-#define GPIO_SPI4_MOSI GPIO_SPI4_MOSI_1
-#define GPIO_SPI4_SCK  GPIO_SPI4_SCK_1
 
 /* Timer Inputs/Outputs (see the README.txt file for options) */
 

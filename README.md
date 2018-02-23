@@ -32,7 +32,7 @@ Continue by uploading the built nuttx to the MCU, you may find [GNU MCU Eclipse 
 
 ## New Board Support
 
- - Robomasters Development Board
+ - Robomasters Development Board (nsh, userled)
 
 ## New Device Driver
  - MPU6050
