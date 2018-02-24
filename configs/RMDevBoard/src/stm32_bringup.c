@@ -1,8 +1,9 @@
 /****************************************************************************
- * config/stm32f429i-disco/src/stm32_bringup.c
+ * config/RMDevBoard/src/stm32_bringup.c
  *
  *   Copyright (C) 2012, 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   		 Kyle Lei <leizhao2@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -62,6 +63,10 @@
 
 #ifdef CONFIG_USBMONITOR
 #  include <nuttx/usb/usbmonitor.h>
+#endif
+
+#ifdef CONFIG_USERLED
+#  include <nuttx/leds/userled.h>
 #endif
 
 #ifndef CONFIG_RMDEVBOARD_FLASH_MINOR
@@ -350,6 +355,16 @@ int stm32_bringup(void)
   if (ret != OK)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize l3gd20 sensor: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_USERLED
+  /* Register the LED driver */
+
+  ret = userled_lower_initialize("/dev/userleds");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
     }
 #endif
 
