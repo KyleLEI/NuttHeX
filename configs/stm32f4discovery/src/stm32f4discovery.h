@@ -403,6 +403,18 @@
 
 void weak_function stm32_spidev_initialize(void);
 
+ /************************************************************************************
+  * Name: stm32_mpu6050initialize
+  *
+  * Description:
+  *   Initializes the InvenSense MPU-6050 6-axis accelerometer/gyroscope.
+  *
+  ************************************************************************************/
+
+ #ifdef CONFIG_SENSORS_MPU6050
+ int stm32_mpu6050initialize(FAR const char *devpath);
+ #endif
+
  /****************************************************************************
   * Name: stm32_i2sdev_initialize
   *

@@ -1594,7 +1594,7 @@ int mfrc522_register(FAR const char *devpath, FAR struct spi_dev_s *spi)
 
   /* If returned firmware version is unknown don't register the device */
 
-  if (fwver != 0x90 && fwver != 0x91 && fwver != 0x92 && fwver != 0x88 )
+  if (fwver != 0x90 && fwver != 0x91 && fwver != 0x92 && fwver != 0x88 && fwver != 18)
     {
       mfrc522err("None supported device detected!\n");
       goto firmware_error;

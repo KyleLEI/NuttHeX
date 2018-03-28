@@ -218,8 +218,8 @@
  * stm32f4discovery.  The following definitions describe how NuttX controls the LEDs:
  */
 
-#define LED_STARTED       0  /* LED1 */
-#define LED_HEAPALLOCATE  1  /* LED2 */
+#define LED_STARTED       1  /* LED1 */
+#define LED_HEAPALLOCATE  0  /* LED2 */
 #define LED_IRQSENABLED   2  /* LED1 + LED2 */
 #define LED_STACKCREATED  3  /* LED3 */
 #define LED_INIRQ         4  /* LED1 + LED3 */
