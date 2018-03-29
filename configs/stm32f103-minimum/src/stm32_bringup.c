@@ -362,5 +362,12 @@ int stm32_bringup(void)
   stm32_wlinitialize();
 #endif
 
+#if defined(CONFIG_LCD_BACKPACK)
+	ret = stm32_lcdbpinitialize("/dev/slcd0");
+	if (ret < 0)
+	  {
+		syslog(LOG_ERR, "ERROR: stm32_lcdbpinitialize() failed: %d\n", ret);
+	  }
+#endif
   return ret;
 }

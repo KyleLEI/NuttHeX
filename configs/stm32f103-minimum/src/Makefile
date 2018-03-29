@@ -145,4 +145,8 @@ ifeq ($(CONFIG_USBMSC),y)
 CSRCS += stm32_usbmsc.c
 endif
 
+ifeq ($(CONFIG_LCD_BACKPACK),y)
+CSRCS += stm32_lcdbp.c
+endif
+
 include $(TOPDIR)/configs/Board.mk

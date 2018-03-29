@@ -31,9 +31,7 @@ make
 Continue by uploading the built nuttx to the MCU, you may find [GNU MCU Eclipse plug-ins](https://gnu-mcu-eclipse.github.io/plugins/install/) useful.
 
 ## New Board Support
-
  - Robomasters Development Board (nsh, userled)
-
 ## New Device Driver
  - MPU6050
-
+ - LCD1602 for STM32F103-minimum

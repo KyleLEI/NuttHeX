@@ -430,5 +430,18 @@ int stm32_tone_setup(void);
 int stm32_veml6070initialize(FAR const char *devpath);
 #endif
 
+/***********************************************************************************
+ * Name: stm32_lcdbpinitialize
+ *
+ * Description:
+ *   Called to configure an I2C and to register PCF8574 LCD Backpack for the
+ *   stm32f103-minimum board.
+ *
+ ***********************************************************************************/
+
+#ifdef CONFIG_LCD_BACKPACK
+int stm32_lcdbpinitialize(FAR const char *devpath);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_STM32F103_MINIMUM_SRC_STM32F103_MINIMUM_H */
