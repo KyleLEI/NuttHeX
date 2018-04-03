@@ -195,9 +195,8 @@ static int apds9960_int_handler(int irq, FAR void *context, FAR void *arg)
    * are disabled while the work is pending, no special action should be
    * required to protect the work queue.
    */
-
   DEBUGASSERT(priv->work.worker == NULL);
-  ret = work_queue(HPWORK, &priv->work, apds9960_worker, priv, 0);
+  ret = work_queue(HPWORK, &priv->work, apds9960_worker, priv, 10);
   if (ret != 0)
     {
       snerr("ERROR: Failed to queue work: %d\n", ret);
@@ -1263,6 +1262,7 @@ int apds9960_register(FAR const char *devpath,
   priv->config = config;
   nxsem_init(&priv->sample_sem, 0, 0);
   priv->gesture_motion = DIR_NONE;
+  priv->work.worker=NULL;
 
   /* Probe APDS9960 device */
 
