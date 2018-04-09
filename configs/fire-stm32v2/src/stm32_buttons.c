@@ -141,11 +141,11 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 
   if (id == BUTTON_KEY1)
     {
-      gpio = GPIO_KEY1;
+      gpio = GPIO_BTN_KEY1;
     }
   else if (id == BUTTON_KEY2)
     {
-      gpio = GPIO_KEY2;
+      gpio = GPIO_BTN_KEY2;
     }
   else
     {

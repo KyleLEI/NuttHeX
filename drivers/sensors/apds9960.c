@@ -196,7 +196,7 @@ static int apds9960_int_handler(int irq, FAR void *context, FAR void *arg)
    * required to protect the work queue.
    */
   DEBUGASSERT(priv->work.worker == NULL);
-  ret = work_queue(HPWORK, &priv->work, apds9960_worker, priv, 10);
+  ret = work_queue(HPWORK, &priv->work, apds9960_worker, priv, 0);
   if (ret != 0)
     {
       snerr("ERROR: Failed to queue work: %d\n", ret);
