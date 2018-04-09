@@ -32,10 +32,19 @@ Continue by uploading the built nuttx to the MCU, you may find [GNU MCU Eclipse 
 If you are using JLinkExe
 ```
 JLinkExe
-JLink>loadbin [PATH_TO_NUTTX.HEX] 0x0
-Board>STM32F103VE
-Interface>S 
+JLink>loadbin nuttx.hex 0x0
+Device>STM32F103VE
+TIF>s
+Speed> 
 ```
+
+To connect to the shell of NuttX, run
+```
+[Linux] screen /dev/ttyUSB0 115200 8N1
+[OSX] screen /dev/tty.wchusbserial1410 115200 8N1
+```
+To exit, use ^A k
+
 
 ## New Board Support
  - Robomasters Development Board (nsh, userled)
