@@ -24,7 +24,7 @@ git clone https://github.com/KyleLEI/AppsHeX.git apps
 To configure for your own board, browse through available configs located in nuttx/configs for \<board\>/\<config\>. For example, fire-stm32v2/nsh, run
 ```
 cd nuttx
-./tools/configure.sh fire-stmv2/nsh
+./tools/configure.sh fire-stm32v2/nsh
 make
 ```
 Continue by uploading the built nuttx to the MCU, you may find [GNU MCU Eclipse plug-ins](https://gnu-mcu-eclipse.github.io/plugins/install/) useful.
@@ -32,7 +32,7 @@ Continue by uploading the built nuttx to the MCU, you may find [GNU MCU Eclipse 
 If you are using JLinkExe
 ```
 JLinkExe
-JLink>loadbin \[PATH_TO_NUTTX.HEX\] 0x0
+JLink>loadbin [PATH_TO_NUTTX.HEX] 0x0
 Board>STM32F103VE
 Interface>S 
 ```
