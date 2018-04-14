@@ -69,10 +69,6 @@
 #  include <nuttx/leds/userled.h>
 #endif
 
-#ifdef CONFIG_USERLED
-#  include <nuttx/leds/userled.h>
-#endif
-
 #ifdef CONFIG_VIDEO_FB
 #  include <nuttx/video/fb.h>
 #endif

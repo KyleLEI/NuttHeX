@@ -48,8 +48,10 @@
 #include <nuttx/i2c/i2c_master.h>
 
 #include "stm32.h"
-#include "stm32_i2c.h"
 #include "fire-stm32v2.h"
+#ifdef CONFIG_USERLED
+#  include <nuttx/leds/userled.h>
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -215,7 +217,7 @@ static void stm32_i2ctool(void)
 
 int board_app_initialize(uintptr_t arg)
 {
-#if defined(HAVE_MMCSD) || defined(HAVE_W25)
+#if defined(HAVE_MMCSD) || defined(HAVE_W25) ||defined(CONFIG_USERLED)
   int ret;
 #endif
 
@@ -244,6 +246,16 @@ int board_app_initialize(uintptr_t arg)
       syslog(LOG_ERR, "ERROR: Failed to initialize MMC/SD slot %d: %d\n",
              CONFIG_NSH_MMCSDSLOTNO, ret);
       return ret;
+    }
+#endif
+
+#ifdef CONFIG_USERLED
+  /* Register the LED driver */
+
+  ret = userled_lower_initialize("/dev/userleds");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
     }
 #endif
 

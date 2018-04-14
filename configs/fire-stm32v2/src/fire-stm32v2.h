@@ -149,6 +149,14 @@
 
 /* GPIO_LCD_CS - Is there some kind of chip select for SPI1? */
 
+#ifdef CONFIG_ARCH_BOARD_FIRE_STM32V3
+#define GPIO_LED1       (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN5)
+#define GPIO_LED2       (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN0)
+#define GPIO_LED3       (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN1)
+#else
 /* LEDs
  *
  * --- ------ -------------- -------------------------------------------------------------------
@@ -166,6 +174,7 @@
                          GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN4)
 #define GPIO_LED3       (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
                          GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN5)
+#endif
 
 /* Buttons
  *
@@ -184,13 +193,13 @@
 
 #ifdef CONFIG_ARCH_BOARD_FIRE_STM32V3
 #  define GPIO_BTN_KEY1 (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_MODE_INPUT|\
-                         GPIO_EXTI|GPIO_PORTE|GPIO_PIN5)
+                         GPIO_EXTI|GPIO_PORTA|GPIO_PIN0)
 #else
 #  define GPIO_BTN_KEY1 (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_MODE_INPUT|\
                          GPIO_EXTI|GPIO_PORTB|GPIO_PIN0)
 #endif
 #define GPIO_BTN_KEY2   (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_MODE_INPUT|\
-                         GPIO_EXTI|GPIO_PORTB|GPIO_PIN1)
+                         GPIO_EXTI|GPIO_PORTC|GPIO_PIN13)
 
 /* 2MBit SPI FLASH
  *

@@ -45,9 +45,12 @@
 #ifndef __ASSEMBLY__
 # include <stdint.h>
 #endif
-#include "stm32_rcc.h"
-#include "stm32_sdio.h"
-#include "stm32.h"
+
+#ifdef __KERNEL__
+#  include "stm32_rcc.h"
+#  include "stm32_sdio.h"
+#  include "stm32.h"
+#endif
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -165,7 +168,25 @@
  * usage by the board port is defined in include/board.h and src/up_autoleds.c.
  * The LEDs are used to encode OS-related events as follows:
  */
-                                      /* LED1   LED2   LED3 */
+
+/* LED index values for use with board_userled() */
+
+#define BOARD_LED1        0
+#define BOARD_LED2        1
+#define BOARD_LED3        2
+#define BOARD_NLEDS       3
+
+#define BOARD_LED_RED   BOARD_LED1
+#define BOARD_LED_GREEN  BOARD_LED2
+#define BOARD_LED_BLUE   BOARD_LED3
+
+/* LED bits for use with board_userled_all() */
+
+#define BOARD_LED1_BIT    (1 << BOARD_LED1)
+#define BOARD_LED2_BIT    (1 << BOARD_LED2)
+#define BOARD_LED3_BIT    (1 << BOARD_LED3)
+
+/* LED1   LED2   LED3 */
 #define LED_STARTED                0  /* OFF    OFF    OFF */
 #define LED_HEAPALLOCATE           1  /* ON     OFF    OFF */
 #define LED_IRQSENABLED            2  /* OFF    ON     OFF */

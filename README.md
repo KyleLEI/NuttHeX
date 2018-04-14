@@ -48,6 +48,9 @@ To exit, use ^A k
 
 ## New Board Support
  - Robomasters Development Board (nsh, userled)
+ - Fire MINI-V3 (nsh, userled)
 ## New Device Driver
  - MPU6050
  - LCD1602 for STM32F103-minimum
+## Bug Fix
+ - APDS9960 work queue bug
