@@ -43,7 +43,7 @@ To connect to the shell of NuttX, run
 [Linux] screen /dev/ttyUSB0 115200 8N1
 [OSX] screen /dev/tty.wchusbserial1410 115200 8N1
 ```
-To exit, use ^A k
+To exit, use `^A` ` k`
 
 
 ## New Board Support
@@ -52,5 +52,7 @@ To exit, use ^A k
 ## New Device Driver
  - MPU6050
  - LCD1602 for STM32F103-minimum
+ - SSD1306 for STM32F103-minimum
 ## Bug Fix
  - APDS9960 work queue bug
+ - MFRC522 for cheap Chinese rip-off board
