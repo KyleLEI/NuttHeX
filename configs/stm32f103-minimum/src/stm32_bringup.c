@@ -365,5 +365,13 @@ int stm32_bringup(void)
 		syslog(LOG_ERR, "ERROR: stm32_lcdbpinitialize() failed: %d\n", ret);
 	  }
 #endif
+
+#if	defined(CONFIG_LCD_SSD1306_SEG)
+	ret = stm32_ssd1306seginitialize("/dev/slcd0");
+	if(ret < 0)
+	{
+		syslog(LOG_ERR, "ERROR: stm32_ssd1306seginitialize() failed: %d\n", ret);
+	}
+#endif
   return ret;
 }

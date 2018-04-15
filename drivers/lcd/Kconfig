@@ -1203,6 +1203,30 @@ config LCD_BACKPACK
 		This driver supports known and unknown variants.
 
 		See pcf8574_lcd_backpack_readme.txt
+		
+config LCD_SSD1306_SEG
+	bool "SSD1306 alphanumeric/segment version"
+	default n
+	depends on I2C
+	---help---
+		Enable support for the alphanumeric/segment version of the ssd1306 driver.
+		The motivation was to drive the graphical LCD with minimum overhead.
+		
+if LCD_SSD1306_SEG
+
+config SSD1306_SEG_I2CADDR
+	int "SSD1306 I2C Address"
+	default 60
+	---help---
+		I2C Address of SSD1306
+
+config SSD1306_SEG_I2CFREQ
+	int "SSD1306 I2C Frequency"
+	default 400000
+	---help---
+		I2C Frequency to communicate with SSD1306
+
+endif # LCD_SSD1306_SEG
 
 endif # SLCD
 endmenu # LCD Driver Support

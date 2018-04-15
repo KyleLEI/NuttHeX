@@ -153,4 +153,8 @@ ifeq ($(CONFIG_LCD_BACKPACK),y)
 CSRCS += stm32_lcdbp.c
 endif
 
+ifeq ($(CONFIG_LCD_SSD1306_SEG),y)
+CSRCS += stm32_ssd1306seg.c
+endif
+
 include $(TOPDIR)/configs/Board.mk

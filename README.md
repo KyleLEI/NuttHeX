@@ -53,6 +53,7 @@ To exit, use `^A` ` k`
  - MPU6050
  - LCD1602 for STM32F103-minimum
  - SSD1306 for STM32F103-minimum
+ - SSD1306 alphanumeric/segment version
 ## Bug Fix
  - APDS9960 work queue bug
  - MFRC522 for cheap Chinese rip-off board

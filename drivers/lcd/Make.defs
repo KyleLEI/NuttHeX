@@ -123,6 +123,10 @@ ifeq ($(CONFIG_SLCD),y)
 ifeq ($(CONFIG_LCD_BACKPACK),y)
   CSRCS += pcf8574_lcd_backpack.c
 endif
+
+ifeq ($(CONFIG_LCD_SSD1306_SEG),y)
+  CSRCS += ssd1306_seg.c
+endif
 endif # CONFIG_SLCD
 
 # Include LCD driver build support (the nested if-then-else implements an OR)
