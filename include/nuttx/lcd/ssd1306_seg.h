@@ -44,13 +44,61 @@
 #include <nuttx/i2c/i2c_master.h>
 #include <sys/ioctl.h>
 
+#include <nuttx/fs/ioctl.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+/* IOCTL commands that is supported by the SSD1306_SEG driver */
+
+/* SLCDIOC_FILLLINE:  Fill the specific lines with color
+ *
+ * argument:  Pointer to struct slcd_fill_s, lines specifies in which will be
+ * 				filled
+ */
+
+#define SLCDIOC_FILLLINE  _SLCDIOC(0x0010)
+
+/* SLCDIOC_DRAWBMP:  Draw a BMP at the specified position
+ *
+ * argument:  Pointer to struct slcd_bmp_s, bmp specified in which will be shown
+ * 				in a rectagular region from (x0,y0) to (x1,y1)
+ */
+
+#define SLCDIOC_DRAWBMP  _SLCDIOC(0x0011)
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/* Used with the SLCDIOC_FILLLINE ioctl call */
+struct slcd_fill_s{
+	uint8_t start_line;
+	uint8_t end_line;
+	uint8_t color;
+};
+
+/* Used with the SLCDIOC_SHOWBMP ioctl call */
+struct slcd_bmp_s{
+	uint8_t x0;
+	uint8_t y0;
+	uint8_t x1;
+	uint8_t y1;
+	uint8_t* bmp;
+};
+
 /**************************************************************************************
  * Public Data
  **************************************************************************************/
-
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 int ssd1306_seg_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                        uint8_t addr);
+#ifdef __cplusplus
+}
+#endif
 
 
-
-#endif /* INCLUDE_NUTTX_LCD_SSD1306_SEG_H */
+#endif /* __INCLUDE_NUTTX_LCD_SSD1306_SEG_H */

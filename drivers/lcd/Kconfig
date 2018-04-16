@@ -1209,7 +1209,7 @@ config LCD_SSD1306_SEG
 	default n
 	depends on I2C
 	---help---
-		Enable support for the alphanumeric/segment version of the ssd1306 driver.
+		Enable support for the alphanumeric/segment version of the SSD1306 driver.
 		The motivation was to drive the graphical LCD with minimum overhead.
 		
 if LCD_SSD1306_SEG

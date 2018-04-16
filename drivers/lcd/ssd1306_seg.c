@@ -48,6 +48,7 @@
 #include <stdlib.h>
 
 #include <nuttx/i2c/i2c_master.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
 #include <nuttx/lcd/ssd1306_seg.h>
@@ -370,7 +371,7 @@ static int ssd1306_seg_close(FAR struct file *filep)
 /****************************************************************************
  * Name: ssd1306_seg_write
  *
- *  Description: write the string buffer[3, ...] at x = buffer[0], y = buffer[1]
+ *  Description: write the string buffer[2, ...] at x = buffer[0], y = buffer[1]
  ****************************************************************************/
 
 static ssize_t ssd1306_seg_write(FAR struct file *filep,
@@ -394,7 +395,7 @@ static ssize_t ssd1306_seg_write(FAR struct file *filep,
 		return -EINVAL;
 	}
 
-	ssd1306_seg_showstr(priv,buffer[0],buffer[1],buffer);
+	ssd1306_seg_showstr(priv,buffer[0],buffer[1],buffer+2);
 	return buflen-2;
 }
 
@@ -415,7 +416,32 @@ ssize_t ssd1306_seg_read(FAR struct file *filep, FAR char *buffer,
 int ssd1306_seg_ioctl(FAR struct file *filep, int cmd,
                              unsigned long arg)
 {
-  return -ENOSYS;
+	FAR struct inode *inode;
+	FAR struct ssd1306_seg_dev_s *dev;
+	int ret = OK;
+
+	DEBUGASSERT(filep);
+	inode = filep->f_inode;
+
+	DEBUGASSERT(inode && inode->i_private);
+	dev = inode->i_private;
+
+	switch (cmd) {
+	case SLCDIOC_FILLLINE: {
+
+	}
+		break;
+
+	case SLCDIOC_DRAWBMP: {
+		return -ENOSYS;
+	}
+		break;
+
+	default:
+		lcderr ("ERROR: Unrecognized cmd: %d\n", cmd);
+		return -ENOTTY;
+
+	}
 }
 
 /****************************************************************************
@@ -452,7 +478,7 @@ int ssd1306_seg_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
      (FAR struct ssd1306_seg_dev_s *)kmm_malloc(sizeof(struct ssd1306_seg_dev_s));
    if (priv == NULL)
    {
-     lcdinfo(LOG_ERR, "ERROR: Failed to allocate instance\n");
+     lcderr("ERROR: Failed to allocate instance\n");
      return -ENOMEM;
    }
 
@@ -466,7 +492,7 @@ int ssd1306_seg_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
    ret = register_driver(devpath, &g_ssd1306_seg_fops, 0666, priv);
    if (ret < 0)
    {
-   	 syslog(LOG_ERR,"ERROR: Failed to register driver: %d\n", ret);
+   	 lcderr("ERROR: Failed to register driver: %d\n", ret);
      kmm_free(priv);
     }
 
@@ -476,6 +502,6 @@ int ssd1306_seg_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
    /* Write some test stuff on the screen */
    ssd1306_seg_fillregion(priv,0,0,125,0,0xFF);
    ssd1306_seg_showstr(priv,0,0,"OLED Initialized!");
-     return ret;
+   return ret;
 }
 #endif
