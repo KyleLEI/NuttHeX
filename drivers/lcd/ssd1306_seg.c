@@ -539,11 +539,13 @@ int ssd1306_seg_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
     }
 
    /* Clear the screen */
-   ssd1306_seg_fill(priv,0x00);
+   //ssd1306_seg_fill(priv,0x00); //optional if a bmp is to be drawn next
 
    /* Write some test stuff on the screen */
-   ssd1306_seg_fillregion(priv,0,0,125,0,0xFF);
-   ssd1306_seg_showstr(priv,0,0,"OLED Initialized!");
+   ssd1306_seg_drawbmp(priv,0,0,128,8,(unsigned char*)hkust_logo);
+   ssd1306_seg_showstr(priv,0,0,"ELEC3300 Group 59");
+   ssd1306_seg_showstr(priv,0,1,"Kyle & Kaho");
+
    return ret;
 }
 #endif
