@@ -67,6 +67,12 @@
 
 #define SLCDIOC_DRAWBMP  _SLCDIOC(0x0011)
 
+/* SLCDIOC_CLEAR:  Clear the entire screen
+ *
+ */
+
+#define SLCDIOC_CLEAR  _SLCDIOC(0x0012)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

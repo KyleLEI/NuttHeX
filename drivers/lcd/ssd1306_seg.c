@@ -269,7 +269,7 @@ void ssd1306_seg_fillregion(FAR struct ssd1306_seg_dev_s *priv,
 		unsigned char x0, unsigned char y0, unsigned char x1,unsigned char y1,
 		unsigned char fill_Data)
 {
-	unsigned char m, n;
+	uint8_t m, n;
 	for (m = y0; m <= y1; m++)
 	{
 		ssd1306_writecmd(priv, 0xb0 + m);		//page0-page1
@@ -291,7 +291,7 @@ void ssd1306_seg_fillregion(FAR struct ssd1306_seg_dev_s *priv,
  ****************************************************************************/
 void ssd1306_seg_fill(FAR struct ssd1306_seg_dev_s *priv,unsigned char fill_Data)
 {
-	unsigned char m, n;
+	uint8_t m, n;
 	for (m = 0; m <= 8; m++)
 	{
 		ssd1306_writecmd(priv, 0xb0 + m);		//page0-page1
@@ -304,6 +304,32 @@ void ssd1306_seg_fill(FAR struct ssd1306_seg_dev_s *priv,unsigned char fill_Data
 	}
 }
 
+/****************************************************************************
+ * Name: ssd1306_seg_drawbmp
+ *
+ * Description:
+ *   This function draws a bitmap in the region (x0,y0), (x1,y1)
+ *
+ ****************************************************************************/
+void ssd1306_seg_drawbmp(FAR struct ssd1306_seg_dev_s *priv, uint8_t x0,
+		uint8_t y0, uint8_t x1, uint8_t y1, uint8_t BMP[])
+{
+	unsigned int j = 0;
+	uint8_t x, y;
+
+	if (y1 % 8 == 0)
+		y = y1 / 8;
+	else
+		y = y1 / 8 + 1;
+	for (y = y0; y < y1; y++)
+	{
+		ssd1306_seg_setpos(priv,x0, y);
+		for (x = x0; x < x1; x++)
+		{
+			ssd1306_writedat(priv,BMP[j++]);
+		}
+	}
+}
 
 void ssd1306_seg_on(FAR struct ssd1306_seg_dev_s *priv)
 {
@@ -371,7 +397,7 @@ static int ssd1306_seg_close(FAR struct file *filep)
 /****************************************************************************
  * Name: ssd1306_seg_write
  *
- *  Description: write the string buffer[2, ...] at x = buffer[0], y = buffer[1]
+ *  Description: write the string buffer[2, ...] at x = buffer[0]-1 , y = buffer[1]-1
  ****************************************************************************/
 
 static ssize_t ssd1306_seg_write(FAR struct file *filep,
@@ -389,13 +415,13 @@ static ssize_t ssd1306_seg_write(FAR struct file *filep,
 
 	/* Check if the user is writing the right size */
 
-	if (buflen < 2)
+	if (buflen < 3)
 	{
 		snerr ("ERROR: You need to write {x, y, str} to the driver!\n");
 		return -EINVAL;
 	}
 
-	ssd1306_seg_showstr(priv,buffer[0],buffer[1],buffer+2);
+	ssd1306_seg_showstr(priv,buffer[0]-1,buffer[1]-1,buffer+2);
 	return buflen-2;
 }
 
@@ -410,7 +436,7 @@ ssize_t ssd1306_seg_read(FAR struct file *filep, FAR char *buffer,
 }
 
 /****************************************************************************
- * Name: ssd1306_write
+ * Name: ssd1306_ioctl
  ****************************************************************************/
 
 int ssd1306_seg_ioctl(FAR struct file *filep, int cmd,
@@ -426,14 +452,29 @@ int ssd1306_seg_ioctl(FAR struct file *filep, int cmd,
 	DEBUGASSERT(inode && inode->i_private);
 	dev = inode->i_private;
 
-	switch (cmd) {
-	case SLCDIOC_FILLLINE: {
-
+	switch (cmd)
+	{
+	case SLCDIOC_FILLLINE:
+	{
+		FAR struct slcd_fill_s *fill_info =
+				(FAR struct slcd_fill_s *) ((uintptr_t) arg);
+		ssd1306_seg_fillregion(dev, 0, fill_info->start_line, 125,
+				fill_info->end_line, fill_info->color);
 	}
 		break;
 
-	case SLCDIOC_DRAWBMP: {
-		return -ENOSYS;
+	case SLCDIOC_DRAWBMP:
+	{
+		FAR struct slcd_bmp_s *bmp_info =
+				(FAR struct slcd_bmp_s *) ((uintptr_t) arg);
+		ssd1306_seg_drawbmp(dev, bmp_info->x0, bmp_info->y0, bmp_info->x1,
+				bmp_info->y1, bmp_info->bmp);
+	}
+		break;
+
+	case SLCDIOC_CLEAR:
+	{
+		ssd1306_seg_fill(dev,0x00);
 	}
 		break;
 
@@ -442,6 +483,7 @@ int ssd1306_seg_ioctl(FAR struct file *filep, int cmd,
 		return -ENOTTY;
 
 	}
+	return ret;
 }
 
 /****************************************************************************
