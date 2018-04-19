@@ -259,5 +259,21 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+#if defined(CONFIG_LCD_BACKPACK)
+	ret = stm32_lcdbpinitialize("/dev/slcd0");
+	if (ret < 0)
+	  {
+		syslog(LOG_ERR, "ERROR: stm32_lcdbpinitialize() failed: %d\n", ret);
+	  }
+#endif
+
+#ifdef CONFIG_CL_MFRC522
+  ret = stm32_mfrc522initialize("/dev/rfid0");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_mfrc522initialize() failed: %d\n", ret);
+    }
+#endif
+
   return OK;
 }

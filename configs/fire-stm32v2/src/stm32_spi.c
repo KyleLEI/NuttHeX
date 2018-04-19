@@ -91,8 +91,14 @@ void weak_function stm32_spidev_initialize(void)
 #else
 
   /* Configure FLASH SPI1 CS */
-
+#ifdef CONFIG_MTD_W25
   stm32_configgpio(GPIO_FLASH_CS);
+#endif
+
+  /* Configure MFRC522 chip select */
+#ifdef CONFIG_CL_MFRC522
+  stm32_configgpio(GPIO_CS_MFRC522);
+#endif
 #endif
 
 #endif /* CONFIG_STM32_SPI1 */
@@ -152,12 +158,23 @@ void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
       stm32_gpiowrite(GPIO_ENC28J60_CS, !selected);
     }
 #else
+#ifdef CONFIG_MTD_W25
   if (devid == SPIDEV_FLASH(0))
     {
       /* Set the GPIO low to select and high to de-select */
 
       stm32_gpiowrite(GPIO_FLASH_CS, !selected);
+
     }
+#endif
+
+#ifdef CONFIG_CL_MFRC522
+  if (devid == SPIDEV_CONTACTLESS(0))
+      {
+        stm32_gpiowrite(GPIO_CS_MFRC522, !selected);
+      }
+#endif
+
 #endif
 }
 

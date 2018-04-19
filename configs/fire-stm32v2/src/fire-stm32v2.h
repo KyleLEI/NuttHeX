@@ -214,9 +214,19 @@
  */
 
 #ifndef CONFIG_ENC28J60
+
+#ifdef CONFIG_MTD_W25
 #  define GPIO_FLASH_CS    (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
                             GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
 #endif
+
+#ifdef CONFIG_CL_MFRC522
+#  define GPIO_CS_MFRC522   (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
+#endif
+
+#endif
+
 
 /* ENC28J60
  *
@@ -341,6 +351,31 @@ int stm32_sdinitialize(int minor);
 
 #ifdef CONFIG_MTD_W25
 int stm32_w25initialize(int minor);
+#endif
+
+/***********************************************************************************
+ * Name: stm32_lcdbpinitialize
+ *
+ * Description:
+ *   Called to configure an I2C and to register PCF8574 LCD Backpack for the
+ *   stm32f103-minimum board.
+ *
+ ***********************************************************************************/
+
+#ifdef CONFIG_LCD_BACKPACK
+int stm32_lcdbpinitialize(FAR const char *devpath);
+#endif
+
+/************************************************************************************
+ * Name: stm32_mfrc522initialize
+ *
+ * Description:
+ *   Function used to initialize the MFRC522 RFID Transceiver
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_CL_MFRC522
+int stm32_mfrc522initialize(FAR const char *devpath);
 #endif
 
 #endif /* __ASSEMBLY__ */

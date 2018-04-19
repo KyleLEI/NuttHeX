@@ -93,7 +93,7 @@ void board_userled(int led, bool ledon)
 {
   if ((unsigned)led < BOARD_NLEDS)
     {
-      stm32_gpiowrite(g_ledcfg[led], !ledon);
+      stm32_gpiowrite(g_ledcfg[led], ledon);
     }
 }
 
@@ -108,9 +108,9 @@ void board_userled(int led, bool ledon)
 
 void board_userled_all(uint8_t ledset)
 {
-  stm32_gpiowrite(GPIO_LED1, (ledset & BOARD_LED1_BIT) == 0);
-  stm32_gpiowrite(GPIO_LED2, (ledset & BOARD_LED2_BIT) == 0);
-  stm32_gpiowrite(GPIO_LED3, (ledset & BOARD_LED3_BIT) == 0);
+  stm32_gpiowrite(GPIO_LED1, (ledset & BOARD_LED1_BIT) != 0);
+  stm32_gpiowrite(GPIO_LED2, (ledset & BOARD_LED2_BIT) != 0);
+  stm32_gpiowrite(GPIO_LED3, (ledset & BOARD_LED3_BIT) != 0);
 }
 
 #endif /* !CONFIG_ARCH_LEDS */

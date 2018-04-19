@@ -51,9 +51,11 @@ To exit, use `^A` ` k`
  - Fire MINI-V3 (nsh, userled)
 ## New Device Driver
  - MPU6050
- - LCD1602 for STM32F103-minimum
- - SSD1306 for STM32F103-minimum
+ - LCD1602(backpack) for STM32F103-minimum
+ - SSD1306 for STM32F103-minimum (ported from a recent release)
  - SSD1306 alphanumeric/segment version
+ - MFRC522 for Fire-STM32V2
+ - LCD1602(backpack) for Fire-STM32V2
 ## Bug Fix
  - APDS9960 work queue bug
  - MFRC522 for cheap Chinese rip-off board

@@ -444,11 +444,11 @@ int stm32_lcdbpinitialize(FAR const char *devpath);
 #endif
 
 /***********************************************************************************
- * Name: stm32_lcdbpinitialize
+ * Name: stm32_ssd1306seginitialize
  *
  * Description:
- *   Called to configure an I2C and to register PCF8574 LCD Backpack for the
- *   stm32f103-minimum board.
+ *   Called to configure an I2C and to register the alphanumeric version of SSD1306
+ *   for the stm32f103-minimum board.
  *
  ***********************************************************************************/
 
