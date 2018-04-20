@@ -137,7 +137,6 @@ uint32_t board_buttons(void)
 int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
   uint16_t gpio;
-  int ret;
 
   if (id == BUTTON_KEY1)
     {
