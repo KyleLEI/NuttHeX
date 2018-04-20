@@ -138,14 +138,14 @@ static int rgbled_open(FAR struct file *filep)
   uint8_t                     tmp;
   int                         ret;
 
-  lcdinfo("crefs: %d\n", upper->crefs);
+  ledinfo("crefs: %d\n", upper->crefs);
 
   /* Get exclusive access to the device structures */
 
   ret = nxsem_wait(&upper->exclsem);
   if (ret < 0)
     {
-      lcderr("ERROR: nxsem_wait failed: %d\n", ret);
+      lederr("ERROR: nxsem_wait failed: %d\n", ret);
       DEBUGASSERT(ret == -EINTR);
       goto errout;
     }
@@ -190,14 +190,14 @@ static int rgbled_close(FAR struct file *filep)
   FAR struct rgbled_upperhalf_s *upper = inode->i_private;
   int                         ret;
 
-  lcdinfo("crefs: %d\n", upper->crefs);
+  ledinfo("crefs: %d\n", upper->crefs);
 
   /* Get exclusive access to the device structures */
 
   ret = nxsem_wait(&upper->exclsem);
   if (ret < 0)
     {
-      lcderr("ERROR: nxsem_wait failed: %d\n", ret);
+      lederr("ERROR: nxsem_wait failed: %d\n", ret);
       DEBUGASSERT(ret == -EINTR);
       goto errout;
     }
@@ -459,7 +459,8 @@ static ssize_t rgbled_write(FAR struct file *filep, FAR const char *buffer,
  ****************************************************************************/
 #ifdef CONFIG_PWM_MULTICHAN
 
-int rgbled_register(FAR const char *path, FAR struct pwm_lowerhalf_s *ledrgb)
+int rgbled_register(FAR const char *path, FAR struct pwm_lowerhalf_s *ledrgb,
+		FAR struct pwm_info_s *info)
 {
   FAR struct rgbled_upperhalf_s *upper;
 
@@ -470,7 +471,7 @@ int rgbled_register(FAR const char *path, FAR struct pwm_lowerhalf_s *ledrgb)
 
   if (!upper)
     {
-      lcderr("ERROR: Allocation failed\n");
+      lederr("ERROR: Allocation failed\n");
       return -ENOMEM;
     }
 
@@ -481,9 +482,14 @@ int rgbled_register(FAR const char *path, FAR struct pwm_lowerhalf_s *ledrgb)
   nxsem_init(&upper->exclsem, 0, 1);
   upper->devledrgb = ledrgb;
 
+  /* Specify channels to use, this is different from the traditional RGBLED driver */
+  upper->ledrgb.channels[0] = info->channels[0];
+  upper->ledrgb.channels[1] = info->channels[1];
+  upper->ledrgb.channels[2] = info->channels[2];
+
   /* Register the PWM device */
 
-  lcdinfo("Registering %s\n", path);
+  ledinfo("Registering %s\n", path);
   return register_driver(path, &g_rgbledops, 0666, upper);
 }
 
@@ -501,7 +507,7 @@ int rgbled_register(FAR const char *path, FAR struct pwm_lowerhalf_s *ledr,
 
   if (!upper)
     {
-      lcderr("ERROR: Allocation failed\n");
+      lederr("ERROR: Allocation failed\n");
       return -ENOMEM;
     }
 
@@ -516,7 +522,7 @@ int rgbled_register(FAR const char *path, FAR struct pwm_lowerhalf_s *ledr,
 
   /* Register the PWM device */
 
-  lcdinfo("Registering %s\n", path);
+  ledinfo("Registering %s\n", path);
   return register_driver(path, &g_rgbledops, 0666, upper);
 }
 #endif

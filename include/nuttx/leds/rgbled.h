@@ -87,7 +87,8 @@ extern "C"
  ****************************************************************************/
 #ifdef CONFIG_PWM_MULTICHAN && CONFIG_PWM_NCHANNELS >=3
 
-int rgbled_register(FAR const char *path, FAR struct pwm_lowerhalf_s *ledrgb);
+int rgbled_register(FAR const char *path, FAR struct pwm_lowerhalf_s *ledrgb,
+										  FAR struct pwm_info_s *info);
 
 #else
 int rgbled_register(FAR const char *path, FAR struct pwm_lowerhalf_s *ledr,

@@ -58,8 +58,12 @@
 
 #define HAVE_RGBLED 1
 
-#ifdef CONFIG_ARCH_LEDS || CONFIG_USERLED
+#ifdef CONFIG_ARCH_LEDS
 #  undef HAVE_RGBLED // since they share the same pins
+#endif
+
+#ifdef CONFIG_USERLED
+#  undef HAVE_RGBLED // since they share the same pins as well
 #endif
 
 #ifndef CONFIG_PWM
@@ -146,7 +150,7 @@ int stm32_rgbled_setup(void)
 
       /* Register the RGB LED diver at "/dev/rgbled0" */
 
-      ret = rgbled_register("/dev/rgbled0", ledrgb);
+      ret = rgbled_register("/dev/rgbled0", ledrgb, &info);
       if (ret < 0)
         {
           lederr("ERROR: rgbled_register failed: %d\n", ret);
