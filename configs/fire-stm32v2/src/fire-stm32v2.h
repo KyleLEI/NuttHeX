@@ -378,6 +378,26 @@ int stm32_lcdbpinitialize(FAR const char *devpath);
 int stm32_mfrc522initialize(FAR const char *devpath);
 #endif
 
+/****************************************************************************
+ * Name stm32_rgbled_setup
+ *
+ * Description:
+ *   This function is called by board initialization logic to configure the
+ *   RGB LED driver.  This function will register the driver as /dev/rgbled0.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RGBLED
+int stm32_rgbled_setup(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_FIRE_STM32V2_SRC_FIRE_H */
 

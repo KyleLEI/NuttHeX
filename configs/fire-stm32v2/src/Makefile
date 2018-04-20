@@ -76,4 +76,8 @@ ifeq ($(CONFIG_CL_MFRC522),y)
   CSRCS += stm32_mfrc522.c
 endif
 
+ifeq ($(CONFIG_RGBLED),y)
+  CSRCS += stm32_rgbled.c
+endif
+
 include $(TOPDIR)/configs/Board.mk

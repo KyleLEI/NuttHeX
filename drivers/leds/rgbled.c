@@ -73,12 +73,19 @@ struct rgbled_upperhalf_s
   uint8_t           crefs;    /* The number of times the device has been opened */
   volatile bool     started;  /* True: pulsed output is being generated */
   sem_t             exclsem;  /* Supports mutual exclusion */
+#ifdef CONFIG_PWM_MULTICHAN
+
+  struct pwm_info_s ledrgb;     /* Pulsed output for LED RGB*/
+  struct pwm_lowerhalf_s *devledrgb;
+
+#else
   struct pwm_info_s ledr;     /* Pulsed output for LED R*/
   struct pwm_info_s ledg;     /* Pulsed output for LED G*/
   struct pwm_info_s ledb;     /* Pulsed output for LED B*/
   struct pwm_lowerhalf_s *devledr;
   struct pwm_lowerhalf_s *devledg;
   struct pwm_lowerhalf_s *devledb;
+#endif
 };
 
 /****************************************************************************
@@ -295,9 +302,14 @@ static ssize_t rgbled_write(FAR struct file *filep, FAR const char *buffer,
 
   FAR struct inode *inode = filep->f_inode;
   FAR struct rgbled_upperhalf_s *upper = inode->i_private;
+
+#ifdef CONFIG_PWM_MULTICHAN
+  FAR struct pwm_lowerhalf_s *ledrgb = upper->devledrgb;
+#else
   FAR struct pwm_lowerhalf_s *ledr = upper->devledr;
   FAR struct pwm_lowerhalf_s *ledg = upper->devledg;
   FAR struct pwm_lowerhalf_s *ledb = upper->devledb;
+#endif
 
   unsigned int red;
   unsigned int green;
@@ -382,7 +394,16 @@ static ssize_t rgbled_write(FAR struct file *filep, FAR const char *buffer,
   green ^= 0xffff;
   blue  ^= 0xffff;
 #endif
+#ifdef CONFIG_PWM_MULTICHAN
 
+  upper->ledrgb.frequency = 100;
+  upper->ledrgb.channels[0].duty = red;
+  upper->ledrgb.channels[1].duty = green;
+  upper->ledrgb.channels[2].duty = blue;
+
+  ledrgb->ops->start(ledrgb, &upper->ledrgb);
+
+#else
   /* Setup LED R */
 
   upper->ledr.frequency = 100;
@@ -403,6 +424,7 @@ static ssize_t rgbled_write(FAR struct file *filep, FAR const char *buffer,
   upper->ledb.duty = blue;
 
   ledb->ops->start(ledb, &upper->ledb);
+#endif
 
   return buflen;
 }
@@ -425,7 +447,8 @@ static ssize_t rgbled_write(FAR struct file *filep, FAR const char *buffer,
  *     filesystem.  The recommended convention is to name all PWM drivers
  *     as "/dev/rgdbled0", "/dev/rgbled1", etc.  where the driver path
  *     differs only in the "minor" number at the end of the device name.
- *   ledr, ledg, and ledb - A pointer to an instance of lower half PWM
+ *   ledrgb (with multi-channel support) - A pointer to an instance of lower half PWM driver.
+ *   ledr, ledg, and ledb (if not multi-channel) - A pointer to an instance of lower half PWM
  *     drivers for the red, green, and blue LEDs, respectively.  These
  *     instances will be bound to the RGB LED driver and must persists as
  *     long as that driver persists.
@@ -434,7 +457,37 @@ static ssize_t rgbled_write(FAR struct file *filep, FAR const char *buffer,
  *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
+#ifdef CONFIG_PWM_MULTICHAN
 
+int rgbled_register(FAR const char *path, FAR struct pwm_lowerhalf_s *ledrgb)
+{
+  FAR struct rgbled_upperhalf_s *upper;
+
+  /* Allocate the upper-half data structure */
+
+  upper = (FAR struct rgbled_upperhalf_s *)
+    kmm_zalloc(sizeof(struct rgbled_upperhalf_s));
+
+  if (!upper)
+    {
+      lcderr("ERROR: Allocation failed\n");
+      return -ENOMEM;
+    }
+
+  /* Initialize the PWM device structure (it was already zeroed by
+   * kmm_zalloc())
+   */
+
+  nxsem_init(&upper->exclsem, 0, 1);
+  upper->devledrgb = ledrgb;
+
+  /* Register the PWM device */
+
+  lcdinfo("Registering %s\n", path);
+  return register_driver(path, &g_rgbledops, 0666, upper);
+}
+
+#else
 int rgbled_register(FAR const char *path, FAR struct pwm_lowerhalf_s *ledr,
                                           FAR struct pwm_lowerhalf_s *ledg,
                                           FAR struct pwm_lowerhalf_s *ledb)
@@ -466,5 +519,6 @@ int rgbled_register(FAR const char *path, FAR struct pwm_lowerhalf_s *ledr,
   lcdinfo("Registering %s\n", path);
   return register_driver(path, &g_rgbledops, 0666, upper);
 }
+#endif
 
 #endif /* CONFIG_RGBLED */

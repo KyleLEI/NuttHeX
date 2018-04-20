@@ -198,6 +198,18 @@
 #define LED_PANIC                  4  /* NC     NC     ON  (2Hz flashing) */
 #undef  LED_IDLE                      /* Sleep mode indication not supported */
 
+/* RGB LED
+ *
+ * R = TIM3 CH2 on PB5 | G = TIM3 CH3 on PB0 | B = TIM3 CH4 on PB1
+ *
+ * Note: Pin configs: GPIO_TIM1_CH1OUT ; GPIO_TIM2_CH2OUT ; GPIO_TIM4_CH4OUT
+ */
+
+#define RGBLED_RGBPWMTIMER   3
+#define RGBLED_RPWMCHANNEL 2
+#define RGBLED_GPWMCHANNEL 3
+#define RGBLED_BPWMCHANNEL 4
+
 /* The M3 Wildfire supports several two user buttons:  KEY1 and KEY2 */
 
 #define BUTTON_KEY1                0

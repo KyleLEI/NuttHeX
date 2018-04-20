@@ -85,11 +85,15 @@ extern "C"
  *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
+#ifdef CONFIG_PWM_MULTICHAN && CONFIG_PWM_NCHANNELS >=3
 
+int rgbled_register(FAR const char *path, FAR struct pwm_lowerhalf_s *ledrgb);
+
+#else
 int rgbled_register(FAR const char *path, FAR struct pwm_lowerhalf_s *ledr,
                                           FAR struct pwm_lowerhalf_s *ledg,
                                           FAR struct pwm_lowerhalf_s *ledb);
-
+#endif
 #undef EXTERN
 #ifdef __cplusplus
 }

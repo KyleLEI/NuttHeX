@@ -217,9 +217,8 @@ static void stm32_i2ctool(void)
 
 int board_app_initialize(uintptr_t arg)
 {
-#if defined(HAVE_MMCSD) || defined(HAVE_W25) ||defined(CONFIG_USERLED)
   int ret;
-#endif
+
 
   /* Register I2C drivers on behalf of the I2C tool */
 
@@ -259,7 +258,7 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
-#if defined(CONFIG_LCD_BACKPACK)
+#ifdef CONFIG_LCD_BACKPACK
 	ret = stm32_lcdbpinitialize("/dev/slcd0");
 	if (ret < 0)
 	  {
@@ -272,6 +271,17 @@ int board_app_initialize(uintptr_t arg)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_mfrc522initialize() failed: %d\n", ret);
+    }
+#endif
+
+
+#ifdef CONFIG_RGBLED
+  /* Configure and initialize the RGB LED. */
+
+  ret = stm32_rgbled_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_rgbled_setup() failed: %d\n", ret);
     }
 #endif
 

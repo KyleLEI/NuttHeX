@@ -56,6 +56,8 @@ To exit, use `^A` ` k`
  - SSD1306 alphanumeric/segment version
  - MFRC522 for Fire-STM32V2
  - LCD1602(backpack) for Fire-STM32V2
+ - RGBLED for Fire-STM32V2
 ## Bug Fix
  - APDS9960 work queue bug
  - MFRC522 for cheap Chinese rip-off board
+ - RGBLED supports multi-channel output
