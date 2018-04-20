@@ -95,14 +95,14 @@ uint32_t board_buttons(void)
 {
   uint32_t ret = 0;
 
-  /* Check that state of each key.  A LOW value means that the key is pressed, */
+  /* Check that state of each key.  A HIGH value means that the key is pressed, */
 
-  if (!stm32_gpioread(GPIO_BTN_KEY1))
+  if (stm32_gpioread(GPIO_BTN_KEY1))
     {
       ret |= BUTTON_KEY1_BIT;
     }
 
-  if (!stm32_gpioread(GPIO_BTN_KEY2))
+  if (stm32_gpioread(GPIO_BTN_KEY2))
     {
       ret |= BUTTON_KEY2_BIT;
     }

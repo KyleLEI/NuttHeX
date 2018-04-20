@@ -202,16 +202,17 @@
                          GPIO_EXTI|GPIO_PORTC|GPIO_PIN13)
 
 /* GPIO pins used by the GPIO Subsystem */
-
+#define BOARD_NGPIOIN 0
+#define BOARD_NGPIOINT 0
 #define BOARD_NGPIOOUT    4 /* Amount of GPIO Output pins */
 #define GPIO_OUT1         (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
-                           GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN1)
+                           GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN7)
 #define GPIO_OUT2         (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
-                           GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN1)
+                           GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN6)
 #define GPIO_OUT3         (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
-                           GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN1)
+                           GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN12)
 #define GPIO_OUT4         (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
-                           GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN1)
+                           GPIO_OUTPUT_SET|GPIO_PORTD|GPIO_PIN2)
 
 #define GPIO_ESP8266_WIFI_EN (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
                            GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN8)
@@ -312,6 +313,18 @@
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_gpio_initialize
+ *
+ * Description:
+ *   Initialize GPIO drivers for use with /apps/examples/gpio
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_GPIO
+int stm32_gpio_initialize(void);
+#endif
 
 /************************************************************************************
  * Name: stm32_spidev_initialize

@@ -52,6 +52,9 @@
 #ifdef CONFIG_USERLED
 #  include <nuttx/leds/userled.h>
 #endif
+#ifdef CONFIG_BUTTONS
+#  include <nuttx/input/buttons.h>
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -218,11 +221,21 @@ static void stm32_i2ctool(void)
 int board_app_initialize(uintptr_t arg)
 {
   int ret;
+  ret = 0;
 
 
   /* Register I2C drivers on behalf of the I2C tool */
 
   stm32_i2ctool();
+
+#ifdef CONFIG_DEV_GPIO
+  ret = stm32_gpio_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
+      return ret;
+    }
+#endif
 
 #ifdef HAVE_W25
   /* Initialize and register the W25 FLASH file system. */
@@ -286,10 +299,20 @@ int board_app_initialize(uintptr_t arg)
 #endif
 
 #ifdef CONFIG_NETUTILS_ESP8266
-  ret = stm32_rgbled_setup();
+  ret = stm32_esp8266initialize();
   if (ret < 0)
    	{
-        syslog(LOG_ERR, "ERROR: stm32_rgbled_setup() failed: %d\n", ret);
+        syslog(LOG_ERR, "ERROR: stm32_esp8266initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_BUTTONS
+  /* Register the BUTTON driver */
+
+  ret = btn_lower_initialize("/dev/buttons");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
     }
 #endif
 

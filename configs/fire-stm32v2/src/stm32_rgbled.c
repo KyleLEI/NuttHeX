@@ -86,6 +86,10 @@
 #  undef HAVE_RGBLED
 #endif
 
+#if CONFIG_PWM_NCHANNELS <3
+#  undef HAVE_RGBLED
+#endif
+
 #ifndef CONFIG_STM32_TIM3_CH2OUT
 #  undef HAVE_PWM
 #endif

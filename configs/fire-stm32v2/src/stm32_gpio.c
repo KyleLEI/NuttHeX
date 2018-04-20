@@ -79,18 +79,26 @@ struct stm32gpint_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
+#if BOARD_NGPIOIN > 0
 static int gpin_read(FAR struct gpio_dev_s *dev, FAR bool *value);
+#endif
+
+#if BOARD_NGPIOOUT > 0
 static int gpout_read(FAR struct gpio_dev_s *dev, FAR bool *value);
 static int gpout_write(FAR struct gpio_dev_s *dev, bool value);
+#endif
+
+#if BOARD_NGPIOINT > 0
 static int gpint_read(FAR struct gpio_dev_s *dev, FAR bool *value);
 static int gpint_attach(FAR struct gpio_dev_s *dev,
                         pin_interrupt_t callback);
 static int gpint_enable(FAR struct gpio_dev_s *dev, bool enable);
+#endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
+#if BOARD_NGPIOIN > 0
 static const struct gpio_operations_s gpin_ops =
 {
   .go_read   = gpin_read,
@@ -98,7 +106,9 @@ static const struct gpio_operations_s gpin_ops =
   .go_attach = NULL,
   .go_enable = NULL,
 };
+#endif
 
+#if BOARD_NGPIOOUT > 0
 static const struct gpio_operations_s gpout_ops =
 {
   .go_read   = gpout_read,
@@ -106,7 +116,9 @@ static const struct gpio_operations_s gpout_ops =
   .go_attach = NULL,
   .go_enable = NULL,
 };
+#endif
 
+#if BOARD_NGPIOINT > 0
 static const struct gpio_operations_s gpint_ops =
 {
   .go_read   = gpint_read,
@@ -114,6 +126,7 @@ static const struct gpio_operations_s gpint_ops =
   .go_attach = gpint_attach,
   .go_enable = gpint_enable,
 };
+#endif
 
 #if BOARD_NGPIOIN > 0
 /* This array maps the GPIO pins used as INPUT */
@@ -155,17 +168,7 @@ static struct stm32gpint_dev_s g_gpint[BOARD_NGPIOINT];
  * Private Functions
  ****************************************************************************/
 
-static int stm32gpio_interrupt(int irq, void *context, void *arg)
-{
-  FAR struct stm32gpint_dev_s *stm32gpint = (FAR struct stm32gpint_dev_s *)arg;
-
-  DEBUGASSERT(stm32gpint != NULL && stm32gpint->callback != NULL);
-  gpioinfo("Interrupt! callback=%p\n", stm32gpint->callback);
-
-  stm32gpint->callback(&stm32gpint->stm32gpio.gpio);
-  return OK;
-}
-
+#if BOARD_NGPIOIN > 0
 static int gpin_read(FAR struct gpio_dev_s *dev, FAR bool *value)
 {
   FAR struct stm32gpio_dev_s *stm32gpio = (FAR struct stm32gpio_dev_s *)dev;
@@ -177,7 +180,9 @@ static int gpin_read(FAR struct gpio_dev_s *dev, FAR bool *value)
   *value = stm32_gpioread(g_gpioinputs[stm32gpio->id]);
   return OK;
 }
+#endif
 
+#if BOARD_NGPIOOUT > 0
 static int gpout_read(FAR struct gpio_dev_s *dev, FAR bool *value)
 {
   FAR struct stm32gpio_dev_s *stm32gpio = (FAR struct stm32gpio_dev_s *)dev;
@@ -199,6 +204,19 @@ static int gpout_write(FAR struct gpio_dev_s *dev, bool value)
   gpioinfo("Writing %d\n", (int)value);
 
   stm32_gpiowrite(g_gpiooutputs[stm32gpio->id], value);
+  return OK;
+}
+#endif
+
+#if BOARD_NGPIOINT > 0
+static int stm32gpio_interrupt(int irq, void *context, void *arg)
+{
+  FAR struct stm32gpint_dev_s *stm32gpint = (FAR struct stm32gpint_dev_s *)arg;
+
+  DEBUGASSERT(stm32gpint != NULL && stm32gpint->callback != NULL);
+  gpioinfo("Interrupt! callback=%p\n", stm32gpint->callback);
+
+  stm32gpint->callback(&stm32gpint->stm32gpio.gpio);
   return OK;
 }
 
@@ -258,6 +276,7 @@ static int gpint_enable(FAR struct gpio_dev_s *dev, bool enable)
 
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -307,6 +326,7 @@ int stm32_gpio_initialize(void)
       /* Configure the pin that will be used as output */
       stm32_gpiowrite(g_gpiooutputs[i], 0);
       stm32_configgpio(g_gpiooutputs[i]);
+      stm32_gpiowrite(g_gpiooutputs[i], true);
 
       pincount++;
     }
