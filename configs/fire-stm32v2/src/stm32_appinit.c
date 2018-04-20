@@ -285,5 +285,13 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+#ifdef CONFIG_NETUTILS_ESP8266
+  ret = stm32_rgbled_setup();
+  if (ret < 0)
+   	{
+        syslog(LOG_ERR, "ERROR: stm32_rgbled_setup() failed: %d\n", ret);
+    }
+#endif
+
   return OK;
 }

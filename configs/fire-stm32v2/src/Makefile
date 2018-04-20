@@ -80,4 +80,12 @@ ifeq ($(CONFIG_RGBLED),y)
   CSRCS += stm32_rgbled.c
 endif
 
+ifeq ($(CONFIG_DEV_GPIO),y)
+  CSRCS += stm32_gpio.c
+endif
+
+ifeq ($(CONFIG_NETUTILS_ESP8266),y)
+  CSRCS += stm32_esp8266.c
+endif
+
 include $(TOPDIR)/configs/Board.mk

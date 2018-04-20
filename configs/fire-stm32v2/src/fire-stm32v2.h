@@ -201,6 +201,21 @@
 #define GPIO_BTN_KEY2   (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_MODE_INPUT|\
                          GPIO_EXTI|GPIO_PORTC|GPIO_PIN13)
 
+/* GPIO pins used by the GPIO Subsystem */
+
+#define BOARD_NGPIOOUT    4 /* Amount of GPIO Output pins */
+#define GPIO_OUT1         (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN1)
+#define GPIO_OUT2         (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN1)
+#define GPIO_OUT3         (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN1)
+#define GPIO_OUT4         (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN1)
+
+#define GPIO_ESP8266_WIFI_EN (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN8)
+
 /* 2MBit SPI FLASH
  *
  * --- ------ -------------- -------------------------------------------------------------------
@@ -397,6 +412,23 @@ int stm32_mfrc522initialize(FAR const char *devpath);
 #ifdef CONFIG_RGBLED
 int stm32_rgbled_setup(void);
 #endif
+
+/************************************************************************************
+ * Name: stm32_esp8266initialize
+ *
+ * Description:
+ *   Turn on ESP8266 by setting WIFI_EN connected to PB8 to 1. Everything else needs to
+ *   be done through general USART driver.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_NETUTILS_ESP8266
+int stm32_esp8266initialize(void);
+#endif
+
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_FIRE_STM32V2_SRC_FIRE_H */
