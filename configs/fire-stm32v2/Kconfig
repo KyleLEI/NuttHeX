@@ -38,7 +38,7 @@ config FIRE_STM32_AT24_NXFFS
 endchoice # AT24 serial EPPROM configuration
 
 config FIRE_STM32_FLASH
-	bool "MTD driver for external 4Mbyte W25Q32FV FLASH on SPI1"
+	bool "MTD driver for external 8Mbyte W25Q64 FLASH on SPI1"
 	default n
 	select MTD
 	select MTD_W25
@@ -82,7 +82,7 @@ config FIRE_STM32_FLASH_CONFIG_PART_NUMBER
 
 config FIRE_STM32_FLASH_PART_LIST
 	string "Flash partition size list"
-	default "1024,1024,1024,1024"
+	default "1024,1024,1024,1024,1024,1024,1024,1024"
 	depends on FIRE_STM32_FLASH_PART
 	---help---
 		Comma separated list of partition sizes in KB.
