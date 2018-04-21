@@ -67,33 +67,38 @@
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ************************************************************************************/
-int stm32_lcdbpinitialize(FAR const char *devpath) {
-	FAR struct i2c_master_s *i2c;
-	int ret;
+int
+stm32_lcdbpinitialize (FAR const char *devpath)
+{
+  FAR struct i2c_master_s *i2c;
+  int ret;
 
-	/* Initialize I2C */
+  /* Initialize I2C */
 
-	i2c = stm32_i2cbus_initialize(1);
+  i2c = stm32_i2cbus_initialize (1);
 
-	if (!i2c) {
-		syslog(LOG_ERR, "ERROR: Error initializing I2C bus");
-		return -ENODEV;
-	}
+  if (!i2c)
+    {
+      syslog (LOG_ERR, "ERROR: Error initializing I2C bus");
+      return -ENODEV;
+    }
 
-	struct pcf8574_lcd_backpack_config_s cfg = LCD_I2C_BACKPACK_CFG_ROBOT;
+  struct pcf8574_lcd_backpack_config_s cfg = LCD_I2C_BACKPACK_CFG_ROBOT
+  ;
 
-	cfg.addr = 0x3F;
-	cfg.rows = 2;
-	cfg.cols = 16;
+  cfg.addr = 0x3F;
+  cfg.rows = 2;
+  cfg.cols = 16;
 
-	/* Then register the device */
+  /* Then register the device */
 
-	ret = pcf8574_lcd_backpack_register(devpath, i2c, &cfg);
-	if (ret < 0) {
-		syslog(LOG_ERR, "ERROR: Error registering LCD1602: %d\n", ret);
-		return -ENODEV;
-	}
+  ret = pcf8574_lcd_backpack_register (devpath, i2c, &cfg);
+  if (ret < 0)
+    {
+      syslog (LOG_ERR, "ERROR: Error registering LCD1602: %d\n", ret);
+      return -ENODEV;
+    }
 
-	return ret;
+  return ret;
 }
 #endif

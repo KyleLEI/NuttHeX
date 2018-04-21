@@ -157,4 +157,10 @@ ifeq ($(CONFIG_LCD_SSD1306_SEG),y)
 CSRCS += stm32_ssd1306seg.c
 endif
 
+ifeq ($(CONFIG_MTD_AT24XX),y)
+ifeq ($(CONFIG_STM32_I2C1),y)
+CSRCS += stm32_at24.c
+endif
+endif
+
 include $(TOPDIR)/configs/Board.mk

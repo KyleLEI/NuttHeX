@@ -42,6 +42,7 @@
 #include <sys/mount.h>
 
 #include <stdbool.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
 #include <debug.h>
@@ -49,15 +50,24 @@
 #ifdef CONFIG_STM32_SPI1
 #  include <nuttx/spi/spi.h>
 #  include <nuttx/mtd/mtd.h>
-#  include <nuttx/fs/nxffs.h>
+#  include <nuttx/fs/smart.h>
+#  include <nuttx/mtd/configdata.h>
 #endif
 
 #include "stm32_spi.h"
+
 #include "fire-stm32v2.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Debug ********************************************************************/
+/* Non-standard debug that may be enabled just for testing the watchdog
+ * timer
+ */
+
+#define W25_SPI_PORT 1
 
 /* Configuration ************************************************************/
 /* Can't support the W25 device if it SPI1 or W25 support is not enabled */
@@ -73,10 +83,10 @@
 #  undef HAVE_W25
 #endif
 
-/* Can't support both FAT and NXFFS */
+/* Can't support both FAT and SMARTFS */
 
-#if defined(CONFIG_FS_FAT) && defined(CONFIG_FS_NXFFS)
-#  warning "Can't support both FAT and NXFFS -- using FAT"
+#if defined(CONFIG_FS_FAT) && defined(CONFIG_FS_SMARTFS)
+#  warning "Can't support both FAT and SMARTFS -- using FAT"
 #endif
 
 /****************************************************************************
@@ -93,20 +103,22 @@
 
 int stm32_w25initialize(int minor)
 {
+  int ret;
 #ifdef HAVE_W25
   FAR struct spi_dev_s *spi;
   FAR struct mtd_dev_s *mtd;
-#ifdef CONFIG_FS_NXFFS
-  char devname[12];
+  FAR struct mtd_geometry_s geo;
+#if defined(CONFIG_MTD_PARTITION_NAMES)
+  FAR const char *partname = CONFIG_FIRE_STM32_FLASH_PART_NAMES;
 #endif
-  int ret;
 
   /* Get the SPI port */
 
-  spi = stm32_spibus_initialize(1);
+  spi = stm32_spibus_initialize(W25_SPI_PORT);
   if (!spi)
     {
-      ferr("ERROR: Failed to initialize SPI port 2\n");
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI port %d\n",
+             W25_SPI_PORT);
       return -ENODEV;
     }
 
@@ -115,39 +127,175 @@ int stm32_w25initialize(int minor)
   mtd = w25_initialize(spi);
   if (!mtd)
     {
-      ferr("ERROR: Failed to bind SPI port 2 to the SST 25 FLASH driver\n");
+      syslog(LOG_ERR, "ERROR: Failed to bind SPI port %d to the Winbond"
+                      "W25 FLASH driver\n", W25_SPI_PORT);
       return -ENODEV;
     }
 
-#ifndef CONFIG_FS_NXFFS
+#ifndef CONFIG_FS_SMARTFS
   /* And finally, use the FTL layer to wrap the MTD driver as a block driver */
 
   ret = ftl_initialize(minor, mtd);
   if (ret < 0)
     {
-      ferr("ERROR: Initialize the FTL layer\n");
+      syslog(LOG_ERR, "ERROR: Initialize the FTL layer\n");
       return ret;
     }
 #else
-  /* Initialize to provide NXFFS on the MTD interface */
+  /* Initialize to provide SMARTFS on the MTD interface */
 
-  ret = nxffs_initialize(mtd);
+  /* Get the geometry of the FLASH device */
+
+  ret = mtd->ioctl(mtd, MTDIOC_GEOMETRY, (unsigned long)((uintptr_t)&geo));
   if (ret < 0)
     {
-      ferr("ERROR: NXFFS initialization failed: %d\n", -ret);
+      syslog(LOG_ERR, "ERROR: mtd->ioctl failed: %d\n", ret);
       return ret;
     }
 
-  /* Mount the file system at /mnt/w25 */
+#ifdef CONFIG_FIRE_STM32_FLASH_PART
+  {
+    int partno;
+    int partsize;
+    int partoffset;
+    int partszbytes;
+    int erasesize;
+    const char *partstring = CONFIG_FIRE_STM32_FLASH_PART_LIST;
+    const char *ptr;
+    FAR struct mtd_dev_s *mtd_part;
+    char  partref[4];
 
-  snprintf(devname, 12, "/mnt/w25%c", 'a' + minor);
-  ret = mount(NULL, devname, "nxffs", 0, NULL);
-  if (ret < 0)
-    {
-      ferr("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
-      return ret;
-    }
+    /* Now create a partition on the FLASH device */
+
+    partno = 0;
+    ptr = partstring;
+    partoffset = 0;
+
+    /* Get the Flash erase size */
+
+    erasesize = geo.erasesize;
+
+    while (*ptr != '\0')
+      {
+        /* Get the partition size */
+
+        partsize = atoi(ptr);
+        partszbytes = (partsize << 10); /* partsize is defined in KB */
+
+        /* Check if partition size is bigger then erase block */
+
+        if (partszbytes < erasesize)
+          {
+            syslog(LOG_ERR, "ERROR: Partition size is lesser than erasesize!\n");
+            return -1;
+          }
+
+        /* Check if partition size is multiple of erase block */
+
+        if ( (partszbytes % erasesize) != 0 )
+          {
+            syslog(LOG_ERR, "ERROR: Partition size is not multiple of erasesize!\n");
+            return -1;
+          }
+
+        mtd_part = mtd_partition(mtd, partoffset,  partszbytes/ erasesize);
+        partoffset += partszbytes / erasesize;
+
+#ifdef CONFIG_FIRE_STM32_FLASH_CONFIG_PART
+        /* Test if this is the config partition */
+
+        if (CONFIG_FIRE_STM32_FLASH_CONFIG_PART_NUMBER == partno)
+          {
+            /* Register the partition as the config device */
+
+            mtdconfig_register(mtd_part);
+          }
+        else
 #endif
+          {
+            /* Now initialize a SMART Flash block device and bind it
+             * to the MTD device.
+             */
+
+#if defined(CONFIG_MTD_SMART) && defined(CONFIG_FS_SMARTFS)
+            sprintf(partref, "p%d", partno);
+            smart_initialize(CONFIG_FIRE_STM32_FLASH_MINOR, mtd_part, partref);
 #endif
+          }
+
+        /* Set the partition name */
+
+#if defined(CONFIG_MTD_PARTITION_NAMES)
+        if (!mtd_part)
+          {
+            syslog(LOG_ERR, "Error: failed to create partition %s\n", partname);
+            return -1;
+          }
+
+        mtd_setpartitionname(mtd_part, partname);
+
+        /* Now skip to next name.  We don't need to split the string here
+         * because the MTD partition logic will only display names up to
+         * the comma, thus allowing us to use a single static name
+         * in the code.
+         */
+
+        while (*partname != ',' && *partname != '\0')
+          {
+            /* Skip to next ',' */
+
+            partname++;
+          }
+
+        if (*partname == ',')
+          {
+            partname++;
+          }
+#endif
+
+        /* Update the pointer to point to the next size in the list */
+
+        while ((*ptr >= '0') && (*ptr <= '9'))
+          {
+            ptr++;
+          }
+
+        if (*ptr == ',')
+          {
+            ptr++;
+          }
+
+        /* Increment the part number */
+
+        partno++;
+      }
+  }
+#else /* CONFIG_FIRE_STM32_FLASH_PART */
+
+  /* Configure the device with no partition support */
+
+  smart_initialize(CONFIG_FIRE_STM32_FLASH_MINOR, mtd, NULL);
+
+#endif /* CONFIG_FIRE_STM32_FLASH_PART */
+#endif /* CONFIG_FS_SMARTFS */
+#endif /* HAVE_W25 */
+
+  /* Create a RAM MTD device if configured */
+
+#if defined(CONFIG_RAMMTD) && defined(CONFIG_FIRE_STM32_RAMMTD)
+  {
+    uint8_t *start = (uint8_t *)kmm_malloc(CONFIG_FIRE_STM32_RAMMTD_SIZE * 1024);
+    mtd = rammtd_initialize(start, CONFIG_FIRE_STM32_RAMMTD_SIZE * 1024);
+    mtd->ioctl(mtd, MTDIOC_BULKERASE, 0);
+
+#if defined(CONFIG_MTD_SMART) && defined(CONFIG_FS_SMARTFS)
+    /* Now initialize a SMART Flash block device and bind it to the MTD device */
+
+    smart_initialize(CONFIG_FIRE_STM32_RAMMTD_MINOR, mtd, NULL);
+#endif
+  }
+
+#endif /* CONFIG_RAMMTD && CONFIG_FIRE_STM32_RAMMTD */
+
   return OK;
 }

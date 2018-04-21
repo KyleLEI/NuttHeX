@@ -137,7 +137,8 @@
  *
  ****************************************************************************/
 
-int stm32_bringup(void)
+int
+stm32_bringup (void)
 {
 #ifdef CONFIG_ONESHOT
   struct oneshot_lowerhalf_s *os = NULL;
@@ -145,10 +146,10 @@ int stm32_bringup(void)
   int ret = OK;
 
 #ifdef CONFIG_DEV_GPIO
-  ret = stm32_gpio_initialize();
+  ret = stm32_gpio_initialize ();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
+      syslog (LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
       return ret;
     }
 #endif
@@ -179,18 +180,29 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize W25 minor %d: %d\n",
-             CONFIG_NSH_W25MINOR, ret);
+	  CONFIG_NSH_W25MINOR, ret);
       return ret;
     }
 #endif
 
+#ifdef HAVE_AT24
+  /* Initialize the AT24 driver */
+
+  ret = stm32_at24_automount(AT24_MINOR);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_at24_automount failed: %d\n", ret);
+      return ret;
+    }
+#endif /* HAVE_AT24 */
+
 #ifdef CONFIG_PWM
   /* Initialize PWM and register the PWM device. */
 
-  ret = stm32_pwm_setup();
+  ret = stm32_pwm_setup ();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
+      syslog (LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
     }
 #endif
 
@@ -227,10 +239,10 @@ int stm32_bringup(void)
 #ifdef CONFIG_RGBLED
   /* Configure and initialize the RGB LED. */
 
-  ret = stm32_rgbled_setup();
+  ret = stm32_rgbled_setup ();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32_rgbled_setup() failed: %d\n", ret);
+      syslog (LOG_ERR, "ERROR: stm32_rgbled_setup() failed: %d\n", ret);
     }
 #endif
 
@@ -265,10 +277,10 @@ int stm32_bringup(void)
 #endif
 
 #ifdef CONFIG_CL_MFRC522
-  ret = stm32_mfrc522initialize("/dev/rfid0");
+  ret = stm32_mfrc522initialize ("/dev/rfid0");
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32_mfrc522initialize() failed: %d\n", ret);
+      syslog (LOG_ERR, "ERROR: stm32_mfrc522initialize() failed: %d\n", ret);
     }
 #endif
 
@@ -283,10 +295,10 @@ int stm32_bringup(void)
 #ifdef CONFIG_BUTTONS
   /* Register the BUTTON driver */
 
-  ret = btn_lower_initialize("/dev/buttons");
+  ret = btn_lower_initialize ("/dev/buttons");
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+      syslog (LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
     }
 #endif
 
@@ -307,8 +319,8 @@ int stm32_bringup(void)
   if (ret != OK)
     {
       syslog(LOG_ERR,
-             "ERROR: Failed to register the qencoder: %d\n",
-             ret);
+	  "ERROR: Failed to register the qencoder: %d\n",
+	  ret);
     }
 #endif
 
@@ -359,19 +371,19 @@ int stm32_bringup(void)
 #endif
 
 #if defined(CONFIG_LCD_BACKPACK)
-	ret = stm32_lcdbpinitialize("/dev/slcd0");
-	if (ret < 0)
-	  {
-		syslog(LOG_ERR, "ERROR: stm32_lcdbpinitialize() failed: %d\n", ret);
-	  }
+  ret = stm32_lcdbpinitialize ("/dev/slcd0");
+  if (ret < 0)
+    {
+      syslog (LOG_ERR, "ERROR: stm32_lcdbpinitialize() failed: %d\n", ret);
+    }
 #endif
 
-#if	defined(CONFIG_LCD_SSD1306_SEG)
-	ret = stm32_ssd1306seginitialize("/dev/slcd0");
-	if(ret < 0)
-	{
-		syslog(LOG_ERR, "ERROR: stm32_ssd1306seginitialize() failed: %d\n", ret);
-	}
+#if defined(CONFIG_LCD_SSD1306_SEG)
+  ret = stm32_ssd1306seginitialize("/dev/slcd0");
+  if(ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_ssd1306seginitialize() failed: %d\n", ret);
+    }
 #endif
   return ret;
 }

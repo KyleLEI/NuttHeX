@@ -237,6 +237,17 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+#ifdef HAVE_AT24
+  /* Initialize the AT24 driver */
+
+  ret = stm32_at24_automount(AT24_MINOR);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_at24_automount failed: %d\n", ret);
+      return ret;
+    }
+#endif /* HAVE_AT24 */
+
 #ifdef HAVE_W25
   /* Initialize and register the W25 FLASH file system. */
 
