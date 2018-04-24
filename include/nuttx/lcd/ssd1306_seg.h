@@ -78,19 +78,21 @@
  ****************************************************************************/
 
 /* Used with the SLCDIOC_FILLLINE ioctl call */
-struct slcd_fill_s{
-	uint8_t start_line;
-	uint8_t end_line;
-	uint8_t color;
+struct slcd_fill_s
+{
+  uint8_t start_line;
+  uint8_t end_line;
+  uint8_t color;
 };
 
 /* Used with the SLCDIOC_SHOWBMP ioctl call */
-struct slcd_bmp_s{
-	uint8_t x0;
-	uint8_t y0;
-	uint8_t x1;
-	uint8_t y1;
-	uint8_t* bmp;
+struct slcd_bmp_s
+{
+  uint8_t x0;
+  uint8_t y0;
+  uint8_t x1;
+  uint8_t y1;
+  const uint8_t* bmp;
 };
 
 /**************************************************************************************
@@ -100,11 +102,11 @@ struct slcd_bmp_s{
 extern "C"
 {
 #endif
-int ssd1306_seg_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
-                       uint8_t addr);
+  int
+  ssd1306_seg_register (FAR const char *devpath, FAR struct i2c_master_s *i2c,
+			uint8_t addr);
 #ifdef __cplusplus
 }
 #endif
-
 
 #endif /* __INCLUDE_NUTTX_LCD_SSD1306_SEG_H */
