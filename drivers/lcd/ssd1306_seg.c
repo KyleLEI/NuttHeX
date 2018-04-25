@@ -417,7 +417,7 @@ ssd1306_seg_close (FAR struct file *filep)
 /****************************************************************************
  * Name: ssd1306_seg_write
  *
- *  Description: write the string buffer[2, ...] at x = buffer[0]-1 , y = buffer[1]-1
+ *  Description: write the string buffer[2, ...] at x = buffer[0] , y = buffer[1]
  ****************************************************************************/
 
 static ssize_t
@@ -442,7 +442,7 @@ ssd1306_seg_write (FAR struct file *filep, FAR const char *buffer,
       return -EINVAL;
     }
 
-  ssd1306_seg_showstr (priv, buffer[0] - 1, buffer[1] - 1, buffer + 2);
+  ssd1306_seg_showstr (priv, buffer[0], buffer[1], buffer + 2);
   return buflen - 2;
 }
 
