@@ -1266,6 +1266,9 @@ int apds9960_register(FAR const char *devpath,
 
   /* Probe APDS9960 device */
 
+  /* My magic fix for any I2C device at startup */
+  nxsig_usleep(100);
+
   ret = apds9960_probe(priv);
   if (ret != OK)
     {

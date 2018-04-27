@@ -337,10 +337,10 @@ stm32_bringup (void)
 #ifdef CONFIG_SENSORS_APDS9960
   /* Register the APDS-9960 gesture sensor */
 
-  ret = stm32_apds9960initialize("/dev/gest0");
+  ret = stm32_apds9960initialize ("/dev/gest0");
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32_apds9960initialize() failed: %d\n", ret);
+      syslog (LOG_ERR, "ERROR: stm32_apds9960initialize() failed: %d\n", ret);
     }
 #endif
 
@@ -379,11 +379,23 @@ stm32_bringup (void)
 #endif
 
 #if defined(CONFIG_LCD_SSD1306_SEG)
-  ret = stm32_ssd1306seginitialize("/dev/slcd0");
-  if(ret < 0)
+  ret = stm32_ssd1306seginitialize ("/dev/slcd0");
+  if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32_ssd1306seginitialize() failed: %d\n", ret);
+      syslog (LOG_ERR, "ERROR: stm32_ssd1306seginitialize() failed: %d\n", ret);
     }
+#endif
+
+  // what I'm doing here is highly non-standard, all to save the precious memory of such a small board
+#if defined(CONFIG_EXAMPLES_SMARTHOME_REMOTE) && !defined(CONFIG_DEV_GPIO)
+
+#define GPIO_ESP8266_WIFI_EN (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+			      GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN1)
+
+  stm32_configgpio (GPIO_ESP8266_WIFI_EN);
+
+  stm32_gpiowrite (GPIO_ESP8266_WIFI_EN, true);
+
 #endif
   return ret;
 }
