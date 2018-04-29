@@ -386,16 +386,5 @@ stm32_bringup (void)
     }
 #endif
 
-  // what I'm doing here is highly non-standard, all to save the precious memory of such a small board
-#if defined(CONFIG_EXAMPLES_SMARTHOME_REMOTE) && !defined(CONFIG_DEV_GPIO)
-
-#define GPIO_ESP8266_WIFI_EN (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
-			      GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN1)
-
-  stm32_configgpio (GPIO_ESP8266_WIFI_EN);
-
-  stm32_gpiowrite (GPIO_ESP8266_WIFI_EN, true);
-
-#endif
   return ret;
 }
