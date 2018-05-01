@@ -50,14 +50,15 @@ To exit, use `^A` ` k`
  - Robomasters Development Board (nsh, userled)
  - Fire MINI-V3 (nsh, userled)
 ## New Device Driver
- - MPU6050
+ - **MPU6050**
  - LCD1602(backpack) for STM32F103-minimum
- - SSD1306 for STM32F103-minimum (ported from a recent release)
- - SSD1306 alphanumeric/segment version
+ - **SSD1306 alphanumeric/segment version**
  - MFRC522 for Fire-STM32V2
  - LCD1602(backpack) for Fire-STM32V2
+ - **Multi-channel PWM RGBLED support**
  - RGBLED for Fire-STM32V2
+ - ESP8266 WIFI\_EN pin for Fire-STM32V2
 ## Bug Fix
  - APDS9960 work queue bug
+ - APDS9960 I2C weird initialization delay
  - MFRC522 for cheap Chinese rip-off board
- - RGBLED supports multi-channel output
