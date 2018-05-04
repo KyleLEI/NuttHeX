@@ -88,10 +88,8 @@ ifeq ($(CONFIG_NETUTILS_ESP8266),y)
   CSRCS += stm32_esp8266.c
 endif
 
-ifeq ($(CONFIG_MTD_AT24XX),y)
-ifeq ($(CONFIG_STM32_I2C1),y)
-CSRCS += stm32_at24.c
-endif
+ifeq ($(CONFIG_ADC),y)
+CSRCS +=  stm32_adc.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

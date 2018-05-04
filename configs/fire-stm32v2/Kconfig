@@ -7,36 +7,6 @@ comment "M3 Wildfire Configuration"
 
 if ARCH_BOARD_FIRE_STM32
 
-config FIRE_STM32_AT24_BLOCKMOUNT
-	bool "AT24 Serial EEPROM auto-mount"
-	default n
-	depends on NSH_ARCHINIT && STM32_I2C1 && MTD_AT24XX
-	---help---
-		Automatically initialize the AT24 I2C EEPROM driver when NSH starts.
-
-choice
-	prompt "AT24 serial EPPROM configuration"
-	default FIRE_STM32_AT24_FTL
-	depends on FIRE_STM32_AT24_BLOCKMOUNT
-
-config FIRE_STM32_AT24_FTL
-	bool "Create AT24 block driver"
-	---help---
-		Create the MTD driver for the AT24 and "wrap" the AT24 as a standard
-		block driver that could then, for example, be mounted using FAT or
-		any other file system.  Any file system may be used, but there will
-		be no wear-leveling.
-
-config FIRE_STM32_AT24_NXFFS
-	bool "Create AT24 NXFFS file system"
-	depends on FS_NXFFS
-	---help---
-		Create the MTD driver for the AT24 and mount the AT24 device as
-		a wear-leveling, NuttX FLASH file system (NXFFS).  The downside of
-		NXFFS is that it can be very slow.
-
-endchoice # AT24 serial EPPROM configuration
-
 config FIRE_STM32_FLASH
 	bool "MTD driver for external 8Mbyte W25Q64 FLASH on SPI1"
 	default n

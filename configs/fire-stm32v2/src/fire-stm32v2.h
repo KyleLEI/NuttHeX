@@ -476,19 +476,16 @@ int stm32_esp8266initialize(void);
 #endif
 
 /************************************************************************************
- * Name: stm32_esp8266initialize
+ * Name: stm32_adc_setup
  *
  * Description:
- *   Automount AT24 on I2C1 to the file system
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
+ *   Initialize ADC and register the ADC driver.
  *
  ************************************************************************************/
-#ifdef HAVE_AT24
-int stm32_at24_automount(int minor);
-#endif
 
+#ifdef CONFIG_ADC
+int stm32_adc_setup(void);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_FIRE_STM32V2_SRC_FIRE_H */
