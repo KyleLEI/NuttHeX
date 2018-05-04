@@ -83,11 +83,11 @@
 /* Identifying number of each ADC channel to be used with Variable Resistor (Pontentiometer)*/
 
 #ifdef CONFIG_STM32_ADC1
-static const uint8_t  g_chanlist[ADC1_NCHANNELS] = {10}; /* ADC12_IN0 */
+static const uint8_t  g_chanlist[ADC1_NCHANNELS] = {11}; /* ADC12_IN1 */
 
 /* Configurations of pins used byte each ADC channels */
 
-static const uint32_t g_pinlist[ADC1_NCHANNELS]  = {GPIO_ADC12_IN10};
+static const uint32_t g_pinlist[ADC1_NCHANNELS]  = {GPIO_ADC12_IN11};
 #endif
 
 /************************************************************************************
